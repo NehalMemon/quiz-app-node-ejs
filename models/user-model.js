@@ -1,54 +1,73 @@
 const mongoose = require('mongoose');
+const { type } = require('../validators/loginSchema');
 
 const UserSchema = new mongoose.Schema({
-    user_name:{
-        type : String,
-        required : true,
+    user_name: {
+        type: String,
+        required: true,
         trim: true
     },
-    email:{
+    email: {
         type: String,
         required: true,
         unique: true,
         trim: true,
         lowercase: true
     },
-    password:{
+    password: {
         type: String,
         required: true,
     },
 
-    email_verified:{
-        type:Boolean,
-        default:false
+    email_verified: {
+        type: Boolean,
+        default: false
     },
 
-    email_otp:{
-        type:String,
+    otp: {
+        type: String,
     },
-    email_otp_expiry:{
+    otp_expiry: {
         type: Date,
     },
+    resendOtp: {
+        type: Boolean,
+        default: false
+    },
 
-    plan:{
-        type:String,
-        enum:["gold" , "diamond" , null],
+    isloggedin: {
+        type: Boolean,
+        default: false
+    },
+    loginopt:{
+        type: String,
+        required: true,
+    },
+
+    loginOtpExpiresAt: Date,
+
+    loginOtpSentAt: Date,
+    
+
+    plan: {
+        type: String,
+        enum: ["gold", "diamond", null],
         default: null,
     },
-    plan_start:{
+    plan_start: {
         type: Date
     },
-    plan_expire:{
+    plan_expire: {
         type: Date
     },
-    is_verfied:{
-        type:Boolean,
-        default:false
+    is_verfied: {
+        type: Boolean,
+        default: false
     },
-    payment_proof:{
-        type:String,
+    payment_proof: {
+        type: String,
     },
-    created_at:{
+    created_at: {
         type: Date,
         default: Date.now
     },

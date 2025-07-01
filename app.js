@@ -9,6 +9,7 @@ const coookieParser=require("cookie-parser")
 const mongoose = require('mongoose');
 const expressSession = require("express-session")
 const flash = require('connect-flash');
+
 require("dotenv").config()
 
 
@@ -31,6 +32,7 @@ app.set("view engine" , "ejs")
 
 
 app.use("/user" , userrouter)
+app.use("/" , indexrouter)
 
 // app.use("/",indexrouter)
 

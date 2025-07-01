@@ -3,30 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <title>Sign Up</title>
+  <script>
+    // Enable resend button after 30 seconds
+    window.addEventListener("DOMContentLoaded", () => {
+      const resendBtn = document.getElementById("resendBtn");
+      if (resendBtn) {
+        resendBtn.disabled = true;
+        let counter = 30;
+        resendBtn.innerText = `Resend OTP (${counter})`;
+
+        const interval = setInterval(() => {
+          counter--;
+          resendBtn.innerText = `Resend OTP (${counter})`;
+
+          if (counter <= 0) {
+            clearInterval(interval);
+            resendBtn.disabled = false;
+            resendBtn.innerText = "Resend OTP";
+          }
+        }, 1000);
+      }
+    });
+  </script>
 </head>
 <body>
   <h1>Sign Up</h1>
 
-  <% if (error) { %>
+  <% if (typeof error !== 'undefined' && error) { %>
     <p style="color: red;"><%= error %></p>
   <% } %>
 
-  <% if (success) { %>
+  <% if (typeof success !== 'undefined' && success) { %>
     <p style="color: green;"><%= success %></p>
   <% } %>
 
   <form action="/user/signup" method="POST">
-    <label>Name:</label>
-    <input type="text" name="user_name" required><br><br>
+    <% if (!showOtp) { %>
+      <label>Name:</label>
+      <input type="text" name="user_name" required value="<%= old.user_name %>"><br><br>
 
-    <label>Email:</label>
-    <input type="email" name="email" required><br><br>
+      <label>Email:</label>
+      <input type="email" name="email" required value="<%= old.email %>"><br><br>
 
-    <label>Password:</label>
-    <input type="password" name="password" required><br><br>
+      <label>Password:</label>
+      <input type="password" name="password" required><br><br>
+    <% } else { %>
+      <input type="hidden" name="user_name" value="<%= old.user_name %>">
+      <input type="hidden" name="email" value="<%= old.email %>">
+      <input type="hidden" name="password" value="dummyPassword">
+      
+      <label>Enter OTP:</label>
+      <input type="text" name="otp" required><br><br>
+    <% } %>
 
     <button type="submit">Sign Up</button>
   </form>
+
+  <% if (showOtp) { %>
+    <!-- Resend OTP button -->
+    <form action="/user/signup" method="POST" style="margin-top: 10px;">
+      <input type="hidden" name="resendOtp" value="true">
+      <button type="submit" id="resendBtn">Resend OTP</button>
+    </form>
+  <% } %>
 
   <p>Already have an account? <a href="/user/login">Login here</a></p>
 </body>

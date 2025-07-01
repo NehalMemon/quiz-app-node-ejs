@@ -6,5 +6,9 @@ const registerSchema = joi.object({
     password: joi.string().min(6).required()
 })
 
+const otpSchema = joi.object({
+  otp: joi.string().length(6).required()
+}).unknown(true);
 
-module.exports= registerSchema
+
+module.exports= { registerSchema, otpSchema }
