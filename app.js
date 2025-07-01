@@ -2,11 +2,11 @@ const express = require('express');
 const app = express();
 
 
-const userrouter= require("./routes/userRouter");
-const indexrouter= require("./routes/indexRouter");
+const userRouter= require("./routes/userRouter");
+const indexRouter= require("./routes/indexRouter");
+const adminRouter= require("./routes/adminRouter");
 const path = require('path');
 const coookieParser=require("cookie-parser")
-const mongoose = require('mongoose');
 const expressSession = require("express-session")
 const flash = require('connect-flash');
 
@@ -31,10 +31,11 @@ app.set("view engine" , "ejs")
 
 
 
-app.use("/user" , userrouter)
-app.use("/" , indexrouter)
+app.use("/" , indexRouter)
+app.use("/user" , userRouter)
+app.use("/admin" , adminRouter)
 
-// app.use("/",indexrouter)
+
 
 app.listen(3000 , ()=>{
     console.log("server is running on port 3000")

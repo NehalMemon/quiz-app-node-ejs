@@ -16,22 +16,18 @@
   <% } %>
 
   <form action="/user/login" method="POST">
-    <% if (!showOtp) { %>
+  
       <label for="email">Email:</label>
       <input type="email" name="email" id="email" required value="<%= typeof email !== 'undefined' ? email : '' %>"><br><br>
 
       <label for="password">Password:</label>
       <input type="password" name="password" id="password" required><br><br>
-    <% } else { %>
-      <input type="hidden" name="email" value="<%= email %>">
 
-      <label for="signupOtp">Enter OTP:</label>
-      <input type="text" name="signupOtp" id="signupOtp" required><br><br>
-    <% } %>
 
-    <button type="submit"><%= showOtp ? "Verify OTP" : "Login" %></button>
+
+    <button type="submit"></button>
   </form>
 
-  <p>Don't have an account? <a href="/user/signup">Sign up here</a></p>
+ 
 </body>
 </html>

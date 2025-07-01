@@ -4,25 +4,33 @@ const router = express.Router();
 const validate= require("../middlewares/formsValidator");
 const {registerSchema, otpSchema} = require("../validators/registerSchema")
 const loginSchema = require("../validators/loginSchema")
-const authcontroller = require("../controllers/authController")
+const {authController} = require("../controllers/authController")
 const isloggedin = require("../middlewares/isloggedin");  
 
-const Validator = (req, res, next) => {
-  const schema = req.body.otp ? otpSchema : registerSchema;
+const SignupValidator = (req, res, next) => {
+  const schema = req.body.signupOtp ? otpSchema : registerSchema;
   return validate(schema, {
     flashAndRedirect: true,
     redirectTo: "/user/signup"
   })(req, res, next);
 };
 
-router.get("/signup" ,authcontroller.signupGet )
+const LoginValidator = (req, res, next) => {
+  const schema = req.body.signupOtp ? otpSchema : loginSchema;
+  return validate(schema, {
+    flashAndRedirect: true,
+    redirectTo: "/user/signup"
+  })(req, res, next);
+};
 
-router.post("/signup",Validator,authcontroller.signupPost)
+router.get("/signup" ,authController.signupGet )
 
-router.get("/login" ,authcontroller.loginGet)
+router.post("/signup",SignupValidator,authController.signupPost)
 
-router.post("/login",validate(loginSchema , { flashAndRedirect: true, redirectTo: "/user/login" }),authcontroller.loginPost)
+router.get("/login" ,authController.loginGet)
 
-router.get("/logout", isloggedin.isloggedin, authcontroller.logout);
+router.post("/login",LoginValidator,authController.loginPost)
+
+router.get("/logout", authController.logout);
 
 module.exports = router;

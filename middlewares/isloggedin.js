@@ -2,10 +2,10 @@ const jwt =require("jsonwebtoken");
 const usermodel = require("../models/user-model");
 
 
-module.exports.isloggedin= async (req,res,next) => {
+isloggedin= async (req,res,next) => {
     if(! req.cookies.token){
         req.flash("error", "You must be logged in to access this page");
-        return res.redirect("/")
+        return res.redirect("/user/login")
     }
 
     try{
@@ -19,3 +19,5 @@ module.exports.isloggedin= async (req,res,next) => {
         res.redirect("/")
     }
 }
+
+module.exports = isloggedin

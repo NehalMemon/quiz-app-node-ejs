@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
-const { type } = require('../validators/loginSchema');
+
 
 const UserSchema = new mongoose.Schema({
-    user_name: {
+    userName: {
         type: String,
         required: true,
         trim: true
@@ -19,15 +19,15 @@ const UserSchema = new mongoose.Schema({
         required: true,
     },
 
-    email_verified: {
+    emailVerified: {
         type: Boolean,
         default: false
     },
 
-    otp: {
+    signupOtp: {
         type: String,
     },
-    otp_expiry: {
+    signupOtpExpiry: {
         type: Date,
     },
     resendOtp: {
@@ -39,15 +39,10 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    loginopt:{
-        type: String,
-        required: true,
-    },
-
+    loginOtp: String,
     loginOtpExpiresAt: Date,
-
     loginOtpSentAt: Date,
-    
+    isLoggedIn: Boolean,
 
     plan: {
         type: String,
@@ -71,6 +66,11 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+
+    isAdmin:{
+        type: Boolean,
+        default: false
+    }
 
 })
 
