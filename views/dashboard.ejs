@@ -1,48 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Past Papers Platform</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
-    .button-container {
-      margin-top: 30px;
-    }
-
-    .button-container a {
-      display: inline-block;
-      margin: 10px;
-      padding: 12px 24px;
-      font-size: 16px;
-      text-decoration: none;
-      color: white;
-      background-color: #007BFF;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
-    }
-
-    .button-container a:hover {
-      background-color: #0056b3;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>Admin Panel | MedQuiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>Welcome to Admin Panel</h1>
-  <p>Showcase introduction and plans here.</p>
+<body class="bg-gray-50 text-gray-800 min-h-screen font-sans">
 
-  <div class="button-container">
-    <a href="/user/login">Login</a>
-    <a href="/user/signup">Signup</a>
-    <a href="/admin/login">Admin Login</a>
+  <div class="container mx-auto px-6 py-12 relative">
+    <!-- Logout Button -->
+    <div class="absolute top-4 right-6">
+      <a href="/admin/logout" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-200">
+        Logout
+      </a>
+    </div>
+
+    <!-- Header -->
+    <header class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-blue-600">Welcome to the Admin Panel</h1>
+      <p class="text-gray-600 mt-2 text-lg">Manage quizzes and users efficiently</p>
+    </header>
+
+    <div class="grid gap-10 md:grid-cols-2">
+      <!-- Quiz Management -->
+      <div class="bg-white rounded-2xl shadow-md p-8 hover:shadow-lg transition duration-300">
+        <h2 class="text-2xl font-semibold text-blue-500 mb-4">Quiz Management</h2>
+        <p class="text-gray-600 mb-6">Create, edit, and monitor quizzes for students.</p>
+        <div class="space-y-3">
+          <a href="/admin/create-quiz" class="block w-full text-center bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">Create Quiz</a>
+          <a href="/admin/all-quizzes" class="block w-full text-center bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300">View All Quizzes</a>
+          <a href="/admin/quiz-reports" class="block w-full text-center bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300">Quiz Reports</a>
+        </div>
+      </div>
+
+      <!-- User Management -->
+      <div class="bg-white rounded-2xl shadow-md p-8 hover:shadow-lg transition duration-300">
+        <h2 class="text-2xl font-semibold text-green-500 mb-4">User Management</h2>
+        <p class="text-gray-600 mb-6">Manage student accounts and access.</p>
+        <div class="space-y-3">
+          <a href="/admin/users" class="block w-full text-center bg-green-500 text-white py-3 rounded-lg hover:bg-green-600">View All Users</a>
+          <a href="/admin/grant-access" class="block w-full text-center bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300">Grant Access</a>
+          <a href="/admin/reports" class="block w-full text-center bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300">User Reports</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-16 text-center text-sm text-gray-500">
+      <p>&copy; 2025 MedQuiz Admin Panel. All rights reserved.</p>
+    </footer>
   </div>
+
 </body>
 </html>

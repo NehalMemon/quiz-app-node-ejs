@@ -1,11 +1,19 @@
 const jwt = require("jsonwebtoken")
 
-const tokenGenerator = (user) => {
+const UsertokenGenerator = (user) => {
     return jwt.sign({
-        email:user.eamil , id: user._id
+        email:user.email , id: user._id
     },
     process.env.JWT_KEY,
     {expiresIn:"1h"}
 )}
 
-module.exports = tokenGenerator
+const AdmintokenGenerator = (admin) => {
+    return jwt.sign({
+        email:admin.email , id: admin._id
+    },
+    process.env.JWT_KEY,
+    {expiresIn:"1h"}
+)}
+
+module.exports = {UsertokenGenerator , AdmintokenGenerator}

@@ -7,6 +7,7 @@ const UserSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    
     email: {
         type: String,
         required: true,
@@ -14,6 +15,7 @@ const UserSchema = new mongoose.Schema({
         trim: true,
         lowercase: true
     },
+
     password: {
         type: String,
         required: true,
@@ -27,9 +29,11 @@ const UserSchema = new mongoose.Schema({
     signupOtp: {
         type: String,
     },
+
     signupOtpExpiry: {
         type: Date,
     },
+
     resendOtp: {
         type: Boolean,
         default: false
@@ -39,9 +43,13 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+
     loginOtp: String,
+
     loginOtpExpiresAt: Date,
+
     loginOtpSentAt: Date,
+
     isLoggedIn: Boolean,
 
     plan: {
@@ -49,19 +57,24 @@ const UserSchema = new mongoose.Schema({
         enum: ["gold", "diamond", null],
         default: null,
     },
+
     plan_start: {
         type: Date
     },
+
     plan_expire: {
         type: Date
     },
+
     is_verfied: {
         type: Boolean,
         default: false
     },
+
     payment_proof: {
         type: String,
     },
+
     created_at: {
         type: Date,
         default: Date.now
