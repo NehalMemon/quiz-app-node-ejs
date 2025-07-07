@@ -1,33 +1,59 @@
 document.addEventListener("DOMContentLoaded", () => {
-  let questionIndex = 0;
-
-  function addQuestion() {
-    const container = document.getElementById("questionsContainer");
-
-    const questionBlock = document.createElement("div");
-    questionBlock.className = "mb-8 p-4 border border-gray-300 rounded-lg bg-gray-50";
-
-    questionBlock.innerHTML = `
-      <h2 class="text-xl font-semibold text-gray-700 mb-2">Question ${questionIndex + 1}</h2>
-      <div class="grid gap-4">
-        <input type="text" name="questions[${questionIndex}][questionText]" placeholder="Question Text" required class="w-full border border-gray-300 rounded px-4 py-2" />
-        <div class="grid grid-cols-2 gap-4">
-          <input type="text" name="questions[${questionIndex}][options][]" placeholder="Option A" required class="border border-gray-300 rounded px-4 py-2" />
-          <input type="text" name="questions[${questionIndex}][options][]" placeholder="Option B" required class="border border-gray-300 rounded px-4 py-2" />
-          <input type="text" name="questions[${questionIndex}][options][]" placeholder="Option C" required class="border border-gray-300 rounded px-4 py-2" />
-          <input type="text" name="questions[${questionIndex}][options][]" placeholder="Option D" required class="border border-gray-300 rounded px-4 py-2" />
-        </div>
-        <input type="text" name="questions[${questionIndex}][correctAnswer]" placeholder="Correct Answer" required class="w-full border border-gray-300 rounded px-4 py-2" />
-      </div>
-    `;
-
-    container.appendChild(questionBlock);
-    questionIndex++;
-  }
-
-  // Expose function to global so inline onclick="addQuestion()" works
-  window.addQuestion = addQuestion;
-
-  // Automatically add one question on page load
-  addQuestion();
+  populateExistingQuestions();
 });
+
+function addQuestion(questionData = {}) {
+  const container = document.getElementById("questionsContainer");
+
+  const questionIndex = container.children.length;
+
+  const div = document.createElement("div");
+  div.className = "question-block border p-4 mb-4 rounded bg-gray-50";
+  div.innerHTML = `
+    <input type="text" placeholder="Question Text" class="w-full border px-2 py-1 mb-2" data-type="questionText" value="${questionData.questionText || ''}" required>
+
+    <div class="grid grid-cols-2 gap-2 mb-2">
+      ${(questionData.options || ["", "", "", ""]).map((opt, i) => `
+        <input type="text" placeholder="Option ${i + 1}" class="border px-2 py-1" data-type="option" value="${opt}" required>
+      `).join("")}
+    </div>
+
+    <input type="text" placeholder="Correct Answer" class="w-full border px-2 py-1" data-type="correctAns" value="${questionData.correctAns || ''}" required>
+  `;
+
+  container.appendChild(div);
+}
+
+function prepareQuestions() {
+  const blocks = document.querySelectorAll(".question-block");
+  const questions = [];
+
+  blocks.forEach((block) => {
+    const questionText = block.querySelector('[data-type="questionText"]').value.trim();
+    const correctAns = block.querySelector('[data-type="correctAns"]').value.trim();
+    const optionInputs = block.querySelectorAll('[data-type="option"]');
+
+    const options = Array.from(optionInputs).map(input => input.value.trim()).filter(opt => opt);
+
+    if (questionText && options.length && correctAns) {
+      questions.push({
+        questionText,
+        options,
+        correctAns
+      });
+    }
+  });
+
+  document.getElementById("questionsInput").value = JSON.stringify(questions);
+}
+
+function populateExistingQuestions() {
+  try {
+    const oldData = JSON.parse(document.getElementById("oldData").textContent);
+    if (Array.isArray(oldData)) {
+      oldData.forEach(q => addQuestion(q));
+    }
+  } catch (err) {
+    console.error("Error parsing old questions", err);
+  }
+}

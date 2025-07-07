@@ -6,10 +6,11 @@ const validate = require("../middlewares/formsValidator");
 const loginSchema = require("../validators/loginSchema");
 const { registerSchema } = require("../validators/registerSchema");
 const isAdmin = require("../middlewares/isAdmin");
-const { isAdminloggedin } = require("../middlewares/isloggedin");
+const { isAdminloggedin , isUserOrAdmin } = require("../middlewares/isloggedin");
 
 // Controller
 const { adminController } = require("../controllers/authController");
+const { quizController } = require("../controllers/quizController");
 
 // Admin Signup Routes
 router.get("/signup", adminController.signupGet);
@@ -41,13 +42,16 @@ router.get("/dashboard", isAdminloggedin, (req, res) => {
   res.render("dashboard");
 });
 
-router.get("/create-quiz",isAdminloggedin,(req,res)=>{
-   res.render("createquiz", {
-  error: req.flash("error")[0] || null,
-  success: req.flash("success")[0] || null
-});
+router.get("/create-quiz",isAdminloggedin,quizController.createQuizGet);
 
-})
+router.post("/create-quiz",isAdminloggedin,quizController.createQuizPost);
+
+
+router.get("/quiz/:id/edit" , isAdminloggedin ,quizController.editQuizGet );
+
+router.post("/quiz/:id/edit" , isAdminloggedin ,quizController.editQuizPost );
+
+
 
 
 module.exports = router;

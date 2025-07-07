@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>All Quizzes | MedQuiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800">
+
+  <div class="max-w-7xl mx-auto p-6">
+    <h1 class="text-4xl font-bold text-blue-600 mb-6 text-center">Available Quizzes</h1>
+
+    <!-- Filter Form -->
+    <form method="GET" action="/quiz-section" class="flex flex-wrap justify-center gap-4 mb-8">
+      <input type="text" name="subject" placeholder="Filter by Subject"
+             value="<%= typeof subject !== 'undefined' ? subject : '' %>"
+             class="px-4 py-2 border border-gray-300 rounded-md w-64" />
+             
+      <input type="text" name="topic" placeholder="Filter by Topic"
+             value="<%= typeof topic !== 'undefined' ? topic : '' %>"
+             class="px-4 py-2 border border-gray-300 rounded-md w-64" />
+
+      <button type="submit"
+              class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+        Filter
+      </button>
+    </form>
+
+    <% if (quiz.length === 0) { %>
+      <p class="text-center text-gray-500 text-lg">No quizzes found.</p>
+    <% } %>
+
+    <!-- Quiz Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% quiz.forEach(quiz => { %>
+        <div class="bg-white shadow-md rounded-lg p-6 flex flex-col justify-between">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-2"><%= quiz.title %></h2>
+            <p class="text-sm text-gray-600"><strong>Subject:</strong> <%= quiz.subject %></p>
+            <p class="text-sm text-gray-600"><strong>Topic:</strong> <%= quiz.topic %></p>
+          </div>
+          <div class="mt-4 text-right">
+            <a href="/quiz/<%= quiz._id %>" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+              Open
+            </a>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+
+</body>
+</html>

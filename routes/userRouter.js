@@ -2,10 +2,12 @@ const express = require("express");
 const router = express.Router();
 
 // Middlewares and Validators
+const  {isUserOrAdmin ,isUserloggedin } = require("../middlewares/isloggedin");
 const validate = require("../middlewares/formsValidator");
 const { registerSchema, otpSchema } = require("../validators/registerSchema");
 const loginSchema = require("../validators/loginSchema");
 const { authController } = require("../controllers/authController");
+const { userController } = require("../controllers/userContoller");
 
 // Middleware to choose schema dynamically
 const SignupValidator = (req, res, next) => {
@@ -34,5 +36,7 @@ router.post("/login", LoginValidator, authController.loginPost);
 
 // Logout
 router.get("/logout", authController.logout);
+
+router.get("/profile", isUserloggedin, userController.reportsGet);
 
 module.exports = router;

@@ -1,6 +1,5 @@
 const mongoose = require("mongoose")
-const { type } = require("../validators/loginSchema")
-const { required, boolean } = require("joi")
+
 
 const questionSchema = mongoose.Schema({
     questionText : {
@@ -17,15 +16,15 @@ const questionSchema = mongoose.Schema({
 
 const quizSchema = mongoose.Schema({
     title : {
-        type : string,
+        type : String,
         required : true,
     },
 
     description : {
-        type : string ,
+        type : String ,
     },
 
-    question :[questionSchema],
+    questions:[questionSchema],
 
     subject : {
         type:String,
