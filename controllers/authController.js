@@ -2,6 +2,7 @@
 const usermodel = require("../models/user-model");
 const adminModel = require("../models/admin-model");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 const {UsertokenGenerator,AdmintokenGenerator} = require("../utils/token");
@@ -10,13 +11,20 @@ const authController = {};
 
 // ================= USER SIGNUP =================
 authController.signupGet = (req, res) => {
-  res.render("signup", {
+  const sessionData = req.session.tempUser || {};
+
+  res.render("User-signup", {
+    layout: false,
     error: req.flash("error")[0] || null,
     success: req.flash("success")[0] || null,
-    showOtp: false,
-    old: req.flash("old")[0] || {},
+    showOtp: !!sessionData.signupOtp,  // Show OTP input if OTP was generated
+    old: {
+      userName: sessionData.userName || "",
+      email: sessionData.email || "",
+    },
   });
 };
+
 
 authController.signupPost = async (req, res) => {
   try {
@@ -35,7 +43,13 @@ authController.signupPost = async (req, res) => {
       await sendOtpEmail(sessionData.email, newOtp, "Your New OTP Code");
 
       req.flash("success", "New OTP sent to your email.");
-      return res.redirect("/user/signup");
+      return res.render("User-signup", {
+        error: null,
+        success: req.flash("success")[0],
+        showOtp: true,
+        old: sessionData || {}
+      });
+      
     }
 
     if (email && email.includes("@")) {
@@ -59,7 +73,7 @@ authController.signupPost = async (req, res) => {
         Date.now() > sessionData.signupOtpExpiry
       ) {
         req.flash("error", "Invalid or expired OTP.");
-        return res.render("signup", {
+        return res.render("User-signup", {
           error: req.flash("error")[0],
           success: null,
           showOtp: true,
@@ -77,6 +91,14 @@ authController.signupPost = async (req, res) => {
       req.session.tempUser = null;
       const token = UsertokenGenerator(newUser);
       res.cookie("userToken", token, { httpOnly: true });
+
+
+      req.session.user = {
+        _id: newUser._id,
+        name: newUser.name,
+        isAdmin: newUser.isAdmin  // <-- this must exist if admin
+      };
+      
 
       req.flash("success", "User created successfully");
       return res.redirect("/home");
@@ -100,7 +122,7 @@ authController.signupPost = async (req, res) => {
     await sendOtpEmail(email, otp, "Your OTP Code");
 
     req.flash("success", "OTP sent to your email.");
-    return res.render("signup", {
+    return res.render("User-signup", {
       success: req.flash("success")[0],
       error: null,
       showOtp: true,
@@ -114,18 +136,65 @@ authController.signupPost = async (req, res) => {
 };
 
 // ================= USER LOGIN =================
+
+
+// GET: Login Page
 authController.loginGet = (req, res) => {
-  res.render("login", {
+  let tempData = {};
+  try {
+    const decoded = req.cookies.tempLogin
+      ? jwt.verify(req.cookies.tempLogin, process.env.JWT_SECRET)
+      : {};
+    tempData = decoded;
+  } catch {}
+
+  res.render("User-login", {
+    layout: false,
     error: req.flash("error")[0] || null,
     success: req.flash("success")[0] || null,
-    showOtp: false,
+    showOtp: !!tempData.userId,
+    email: tempData.email || "",
   });
 };
 
+// POST: Handle Login
 authController.loginPost = async (req, res) => {
   try {
-    let { email, password, signupOtp } = req.body;
+    const { email, password, signupOtp, resendOtp } = req.body;
 
+    // ✅ Handle Resend OTP
+    if (resendOtp) {
+      let decoded;
+      try {
+        decoded = jwt.verify(req.cookies.tempLogin, process.env.JWT_KEY);
+      } catch {
+        req.flash("error", "Session expired. Please login again.");
+        return res.redirect("/user/login");
+      }
+
+      const user = await usermodel.findById(decoded.userId);
+      if (!user) {
+        req.flash("error", "User not found.");
+        return res.redirect("/user/login");
+      }
+
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      user.loginOtp = otp;
+      user.loginOtpExpiresAt = Date.now() + 5 * 60 * 1000;
+      await user.save();
+
+      await sendOtpEmail(user.email, otp, "Your Login OTP Code", true);
+      req.flash("success", "New OTP sent to your email.");
+      return res.render("User-login", {
+        layout: false,
+        error: null,
+        success: req.flash("success")[0],
+        showOtp: true,
+        email: user.email,
+      });
+    }
+
+    // ✅ Common email typo fixes
     if (!email) {
       req.flash("error", "Email is required.");
       return res.redirect("/user/login");
@@ -150,43 +219,66 @@ authController.loginPost = async (req, res) => {
       return res.redirect("/user/login");
     }
 
+    // ✅ OTP Verification
     if (signupOtp) {
       if (!user.loginOtp || !user.loginOtpExpiresAt) {
         req.flash("error", "No OTP requested for this account.");
-        return res.render("login", { error: req.flash("error")[0], success: null, showOtp: true, email });
+        return res.render("User-login", {
+          error: req.flash("error")[0],
+          success: null,
+          showOtp: true,
+          email,
+        });
       }
 
       if (user.loginOtp !== signupOtp || Date.now() > user.loginOtpExpiresAt) {
         req.flash("error", "Invalid or expired OTP.");
-        return res.render("login", { error: req.flash("error")[0], success: null, showOtp: true, email });
+        return res.render("User-login", {
+          layout: false,
+          error: req.flash("error")[0],
+          success: null,
+          showOtp: true,
+          email,
+        });
       }
 
+      // ✅ Block re-login within 24 hours
+      if (user.lastLogin && Date.now() - user.lastLogin.getTime() < 86400000) {
+        const hoursLeft = ((86400000 - (Date.now() - user.lastLogin.getTime())) / 3600000).toFixed(1);
+        req.flash("error", `This account is already logged in. Try again in ${hoursLeft} hours.`);
+        return res.redirect("/user/login");
+      }
+
+      // ✅ Finalize login
       user.isLoggedIn = true;
+      user.lastLogin = new Date();
       user.loginOtp = user.loginOtpExpiresAt = user.loginOtpSentAt = null;
       await user.save();
 
       const token = UsertokenGenerator(user);
-      res.cookie("userToken", token, { httpOnly: true, secure: false, sameSite: "strict" });
+      res.clearCookie("tempLogin");
+      res.cookie("userToken", token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "strict",
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+      });
+
+      req.session.user = {
+        _id: user._id,
+        name: user.name,
+        isAdmin: user.isAdmin  // <-- this must exist if admin
+      };
 
       req.flash("success", "Logged in successfully.");
       return res.redirect("/home");
     }
 
-    if (user.isLoggedIn) {
-      req.flash("error", "This account is already in use on another device.");
-      return res.redirect("/user/login");
-    }
-
+    // ✅ Validate Password and send OTP
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       req.flash("error", "Incorrect password.");
       return res.redirect("/user/login");
-    }
-
-    if (user.loginOtpSentAt && Date.now() - user.loginOtpSentAt < 86400000) {
-      const hoursLeft = ((86400000 - (Date.now() - user.loginOtpSentAt)) / 3600000).toFixed(1);
-      req.flash("error", `Please wait ${hoursLeft} hours before requesting a new OTP.`);
-      return res.render("login", { error: req.flash("error")[0], success: null, showOtp: true, email });
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -195,10 +287,24 @@ authController.loginPost = async (req, res) => {
     user.loginOtpSentAt = Date.now();
     await user.save();
 
+    // ✅ Save temp data in cookie (instead of session)
+    const tempPayload = {
+      userId: user._id,
+      email: user.email,
+    };
+    const tempToken = jwt.sign(tempPayload, process.env.JWT_KEY, { expiresIn: "10m" });
+    res.cookie("tempLogin", tempToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 10 * 60 * 1000, // 10 minutes
+    });
+
     await sendOtpEmail(email, otp, "Your Login OTP Code", true);
 
     req.flash("success", "OTP sent to your email. Check your inbox!");
-    return res.render("login", {
+    return res.render("User-login", {
+      layout: false,
       error: null,
       success: req.flash("success")[0],
       showOtp: true,
@@ -210,6 +316,9 @@ authController.loginPost = async (req, res) => {
     return res.redirect("/user/login");
   }
 };
+
+
+
 
 authController.logout = async (req, res) => {
   try {
@@ -227,7 +336,7 @@ authController.logout = async (req, res) => {
 const adminController = {};
 
 adminController.signupGet = (req, res) => {
-  res.render("adminsignup", { error: null, success: null });
+  res.render("Admin-signup", { layout: false, error: null, success: null });
 };
 
 adminController.signupPost = async (req, res) => {
@@ -240,6 +349,12 @@ adminController.signupPost = async (req, res) => {
     const token = AdmintokenGenerator(admin);
     res.cookie("adminToken", token, { httpOnly: true, maxAge: 3600000 });
     console.log("ADMIN TOKEN SET ✅:", token);
+    req.session.user = {
+      _id: admin._id,
+      name: admin.name,
+      isAdmin: admin.isAdmin  // <-- this must exist if admin
+    };
+    
     req.flash("success", "Admin account created successfully");
     return res.redirect("/admin/dashboard");
   } catch (err) {
@@ -250,7 +365,8 @@ adminController.signupPost = async (req, res) => {
 };
 
 adminController.loginGet = (req, res) => {
-  res.render("adminLogin", {
+  res.render("Admin-login", {
+    layout: false,
     error: req.flash("error")[0] || null,
     success: req.flash("success")[0] || null,
   });
@@ -278,7 +394,12 @@ adminController.loginPost = async (req, res) => {
       sameSite: "strict",
       maxAge: 3600000,
     });
-
+    req.session.user = {
+      _id: admin._id,
+      name: admin.name,
+      isAdmin: admin.isAdmin  // <-- this must exist if admin
+    };
+    
     req.flash("success", "Logged in successfully.");
     return res.redirect("/admin/dashboard");
   } catch (err) {
@@ -297,6 +418,85 @@ adminController.logout = async (req, res) => {
   } catch (err) {
     req.flash("error", err.message);
     return res.redirect("/admin/login");
+  }
+};
+
+
+authController.forgotPasswordPost =async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await usermodel.findOne({ email });
+
+    if (!user) {
+      req.flash("error", "No account found with this email.");
+      return res.redirect("/user/forgot-password");
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetOtp = otp;
+    user.resetOtpExpiresAt = Date.now() + 10 * 60 * 1000; // 10 min expiry
+    await user.save();
+
+    await sendOtpEmail(user.email, otp, "Your Password Reset OTP");
+
+    req.session.resetEmail = email;
+    req.flash("success", "OTP sent to your email.");
+    res.redirect("/user/reset-password");
+  } catch (err) {
+    console.error("OTP send error:", err);
+    req.flash("error", "Something went wrong.");
+    res.redirect("/user/forgot-password");
+  }
+};
+
+authController.forgotPasswordGet = (req, res) => {
+  res.render("forget-password", {
+    layout: false,
+    error: req.flash("error")[0] || null,
+    success: req.flash("success")[0] || null
+  });
+};
+
+authController.resetPasswordGet = (req, res) => {
+  res.render("reset-password", {
+    layout: false,
+    error: req.flash("error")[0] || null,
+    success: req.flash("success")[0] || null,
+    email: req.session.resetEmail || "",
+  });
+};
+
+
+authController.resetPasswordPost = async (req, res) => {
+  try {
+    const { otp, newPassword } = req.body;
+    const email = req.session.resetEmail;
+
+    const user = await usermodel.findOne({ email });
+
+    if (!user || !user.resetOtp || !user.resetOtpExpiresAt) {
+      req.flash("error", "Invalid or expired OTP.");
+      return res.redirect("/user/reset-password");
+    }
+
+    const now = Date.now();
+    if (user.resetOtp !== otp || now > user.resetOtpExpiresAt) {
+      req.flash("error", "OTP is invalid or expired.");
+      return res.redirect("/user/reset-password");
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    user.resetOtp = user.resetOtpExpiresAt = null;
+    await user.save();
+
+    req.session.resetEmail = null;
+    req.flash("success", "Password updated successfully.");
+    res.redirect("/user/login");
+  } catch (err) {
+    console.error("Password reset error:", err);
+    req.flash("error", "Something went wrong.");
+    res.redirect("/user/reset-password");
   }
 };
 

@@ -11,6 +11,7 @@ const { isAdminloggedin , isUserOrAdmin } = require("../middlewares/isloggedin")
 // Controller
 const { adminController } = require("../controllers/authController");
 const { quizController } = require("../controllers/quizController");
+const { userController } = require("../controllers/userContoller");
 
 // Admin Signup Routes
 router.get("/signup", adminController.signupGet);
@@ -39,7 +40,7 @@ router.get("/logout", adminController.logout);
 
 // Admin Dashboard (Protected Route)
 router.get("/dashboard", isAdminloggedin, (req, res) => {
-  res.render("dashboard");
+  res.render("Dashboard");
 });
 
 router.get("/create-quiz",isAdminloggedin,quizController.createQuizGet);
@@ -51,6 +52,19 @@ router.get("/quiz/:id/edit" , isAdminloggedin ,quizController.editQuizGet );
 
 router.post("/quiz/:id/edit" , isAdminloggedin ,quizController.editQuizPost );
 
+
+router.post("/quiz/:id/delete" , isAdminloggedin , quizController.deleteQuizPost);
+
+router.post("/quiz/:id/activation" , isAdminloggedin , quizController.activationQuizPost);
+
+
+router.get("/users",isAdminloggedin, userController.viewUsersGet);
+
+router.get("/user/:id",isAdminloggedin, userController.controlUsersGet );
+
+router.post("/delete-user/:id",isAdminloggedin, userController.deleteUsersPost );
+
+router.post("/activation-user/:id",isAdminloggedin, userController.activationUsersPost );
 
 
 

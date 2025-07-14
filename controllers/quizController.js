@@ -4,7 +4,7 @@ const Quiz = require("../models/quiz-model");
 const User = require("../models/user-model");
 
 quizController.createQuizGet = (req, res) => {
-  res.render("createquiz", {
+  res.render("Create-Quiz", {
     error: req.flash("error")[0] || null,
     success: req.flash("success")[0] || null,
     old: req.flash("old")[0] || null
@@ -60,29 +60,36 @@ quizController.createQuizPost = async (req, res) => {
 
 
 quizController.viewQuizSectionGet = async (req, res) => {
-  const { subject, topic } = req.query;
-  const filter = {};
-
-  // Only add filters if they exist in query
-  if (subject) filter.subject = subject;
-  if (topic) filter.topic = topic;
-
   try {
-    const quizzes = await Quiz.find(filter);
+    const { subject, topic } = req.query;
+    const filters = {};
 
-    res.render("quiz_section", {
-      quiz: quizzes,        // always send quiz array (filtered or full)
-      subject,
-      topic,
+    if (subject) filters.subject = { $regex: subject, $options: "i" };
+    if (topic) filters.topic = { $regex: topic, $options: "i" };
+
+    const allQuizzes = await Quiz.find(filters).sort({ createdAt: -1 });
+    const isAdmin = req.admin?.isAdmin || false;
+
+
+    const visibleQuizzes = isAdmin
+      ? allQuizzes
+      : allQuizzes.filter(q => q.isActive);
+
+    res.render("Quiz-section", {
+      quiz: visibleQuizzes,
+      admin: isAdmin,
+      subject: subject || '',
+      topic: topic || '',
       error: req.flash("error")[0] || null,
       success: req.flash("success")[0] || null,
     });
   } catch (err) {
-    console.error("Quiz fetch error:", err);
-    req.flash("error", "Failed to fetch quizzes");
-    res.redirect("/home");
+    console.error("Error fetching quizzes:", err);
+    req.flash("error", "Failed to load quizzes");
+    res.redirect("/");
   }
 };
+
 
 
 quizController.viewQuizGet = async (req,res) => {
@@ -179,7 +186,7 @@ quizController.submitQuizPost = async (req, res) => {
 
     req.session.lastResults = results;
 
-    res.render("quiz-result", {
+    res.render("Quiz-result", {
       quiz,
       results,
     });
@@ -200,7 +207,7 @@ quizController.editQuizGet = async (req, res) => {
       return res.redirect("/admin/dashboard");
     }
 
-    res.render("edit-quiz", {
+    res.render("Edit-quiz", {
       quiz,
       error: req.flash("error")[0] || null,
       success: req.flash("success")[0] || null
@@ -241,5 +248,56 @@ quizController.editQuizPost = async (req, res) => {
   }
 };
 
+quizController.deleteQuizPost = async (req,res) => {
+  try{
+    const quiz = await Quiz.findById(req.params.id);
+
+    if(!quiz){
+      req.flash("error", "Quiz not found");
+      return res.redirect("/admin/quiz-section");
+  }
+
+  await quiz.deleteOne();
+  req.flash("success", "Quiz deleted successfully");
+  res.redirect("/admin/quiz-section");
+}
+  catch(err){
+    console.error("Unable to delete quiz", err);
+    req.flash("error", "Something went wrong");
+    res.redirect("/admin/quiz-section");
+  }
+}
+
+quizController.activationQuizPost = async (req,res) => {
+  try{
+    const quiz = await Quiz.findById(req.params.id);
+
+    if(!quiz){
+      req.flash("error", "Quiz not found");
+      return res.redirect("/admin/quiz-section");
+  }
+
+  
+  if(quiz.isActive){
+    quiz.isActive = false;
+    await quiz.save();
+    req.flash("success", "Quiz activated successfully");
+    res.redirect(`/quiz/${quiz._id}`);
+  }
+  else{
+    quiz.isActive = true;
+    await quiz.save();
+    req.flash("success", "Quiz deactivated successfully");
+    res.redirect(`/quiz/${quiz._id}`);
+  }
+
+
+}
+  catch(err){
+    console.error("Unable to delete quiz", err);
+    req.flash("error", "Something went wrong");
+    res.redirect("/admin/quiz-section");
+  }
+}
 
 module.exports = { quizController };

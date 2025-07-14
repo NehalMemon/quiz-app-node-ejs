@@ -1,0 +1,40 @@
+
+
+  <div class="max-w-4xl mx-auto px-6 py-10">
+    <h1 class="text-3xl font-bold text-blue-600 mb-6 text-center">All Users</h1>
+
+      <!-- Filter Form -->
+      <form method="GET" action="/admin/users" class="flex flex-wrap justify-center gap-4 mb-8">
+        <input type="text" name="name" placeholder="Search by Name"
+               value="<%= typeof name !== 'undefined' ? name : '' %>"
+               class="px-4 py-2 border border-gray-300 rounded-md w-64" />
+               
+        <input type="email" name="email" placeholder="Search by email"
+               value="<%= typeof email !== 'undefined' ? email : '' %>"
+               class="px-4 py-2 border border-gray-300 rounded-md w-64" />
+  
+        <button type="submit"
+                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+          Search
+        </button>
+      </form>
+  
+
+    <% if (users.length === 0) { %>
+      <p class="text-center text-gray-500 text-lg">No users found.</p>
+    <% } else { %>
+      <ul class="space-y-4">
+        <% users.forEach(user => { %>
+          <li class="flex items-center justify-between bg-white p-4 rounded-md shadow-sm border">
+            <span class="text-lg font-medium"><%= user.userName %></span>
+            <a href="/admin/user/<%= user._id %>" 
+               class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+              Details
+            </a>
+          </li>
+        <% }); %>
+      </ul>
+    <% } %>
+  </div>
+
+

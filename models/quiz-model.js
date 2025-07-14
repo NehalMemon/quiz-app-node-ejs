@@ -41,7 +41,7 @@ const quizSchema = mongoose.Schema({
         default : true
     },
 
-    createdIt : {
+    createdAt : {
         type:Date,
         default : Date.now()
     }

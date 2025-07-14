@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title><%= quiz.title %> | MedQuiz</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
+
 
   <div class="max-w-5xl mx-auto px-6 py-10">
     <!-- Header -->
@@ -14,6 +6,12 @@
 <div class="bg-white shadow-md rounded-lg p-8 mb-6 relative">
   <% if (admin) { %>
     <div class="absolute top-4 right-4 flex gap-2">
+      <form action="/admin/quiz/<%= quiz._id %>/activation" method="POST">
+    <button type="submit"
+            class="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded text-sm shadow">
+       <%= quiz.isActive ? "Deactivate" : "Activate" %>
+    </button>
+  </form>
       <a href="/admin/quiz/<%= quiz._id %>/edit" 
          class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1 rounded text-sm shadow">
         ✏️ Edit
@@ -48,14 +46,13 @@
         <p class="text-gray-700 mb-2"><%= quiz.description %></p>
       <% } %>
       <div class="flex flex-wrap gap-4 text-sm text-gray-600">
-        <% if (!quiz.isActive) { %>
-          <span class="text-red-500 font-semibold">Inactive</span>
-        <% } %>
+       
       </div>
     </div>
 
     <!-- Quiz Form (only for students) -->
     <% if (!admin) { %>
+      
     <form action="/quiz/<%= quiz._id %>/submit" method="POST" class="space-y-8">
       <% quiz.questions.forEach((q, index) => { %>
         <div class="bg-white rounded-lg shadow p-6">
@@ -70,6 +67,7 @@
             <% }) %>
           </div>
         </div>
+       
       <% }) %>
 
       <div class="text-center">
@@ -78,6 +76,7 @@
         </button>
       </div>
     </form>
+    
     <% } %>
 
     <!-- Admin View: Show Correct Answers -->
@@ -105,5 +104,3 @@
 
   </div>
 
-</body>
-</html>

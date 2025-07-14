@@ -11,14 +11,13 @@ const expressSession = require("express-session")
 const flash = require('connect-flash');
 
 require("dotenv").config()
-
-
 require("./config/db")()
 
 
 app.use(coookieParser())
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
+app.use(express.static(path.join(__dirname,"src")))
 app.use(express.static(path.join(__dirname,"public")))
 app.use(expressSession({
     resave:false,
@@ -27,8 +26,22 @@ app.use(expressSession({
 }));
 app.use(flash())
 
-app.set("view engine" , "ejs")
+app.use((req, res, next) => {
+    const user = req.session.user || null;
+    res.locals.title = "MedQuiz";
+    res.locals.user = user;
+    res.locals.admin = user?.isAdmin || false;
+    res.locals.error = req.flash('error');
+    res.locals.success = req.flash('success');
+    next();
+  });
+  
 
+
+const expressLayouts = require('express-ejs-layouts');
+app.set("view engine" , "ejs")
+app.use(expressLayouts)
+app.set('layout', 'layouts/main');
 
 
 app.use("/" , indexRouter)
