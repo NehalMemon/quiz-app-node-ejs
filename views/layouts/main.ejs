@@ -1,29 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= title || 'Past Papers Platform' %></title>
-  <link rel="stylesheet" href="/stylesheet/output.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-</head>
-<body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
+
 
   <!-- Header -->
   <%- include('../partials/Header') %>
 
   <!-- Flash Messages -->
   <% if (error && error.length) { %>
-    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 mx-auto max-w-4xl" role="alert">
-      <p class="font-bold">Error</p>
-      <p><%= error %></p>
+    <div class="mx-auto max-w-3xl flex items-center justify-between bg-red-50 border border-red-300 text-red-700 px-6 py-4 rounded-lg shadow-sm mb-6 animate-fade-in">
+      <div>
+        <p class="font-semibold text-red-800">Error</p>
+        <p class="text-sm mt-1"><%= error %></p>
+      </div>
+      <i class="fas fa-times-circle text-red-400 text-xl"></i>
     </div>
   <% } %>
-
+  
   <% if (success && success.length) { %>
-    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 mx-auto max-w-4xl" role="alert">
-      <p class="font-bold">Success</p>
-      <p><%= success %></p>
+    <div class="mx-auto max-w-3xl flex items-center justify-between bg-green-50 border border-green-300 text-green-700 px-6 py-4 rounded-lg shadow-sm mb-6 animate-fade-in">
+      <div>
+        <p class="font-semibold text-green-800">Success</p>
+        <p class="text-sm mt-1"><%= success %></p>
+      </div>
+      <i class="fas fa-check-circle text-green-400 text-xl"></i>
     </div>
   <% } %>
 
@@ -37,5 +34,20 @@
     <%- include('../partials/Footer') %>
   <% } %>
 
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuButton = document.getElementById('mobileMenuButton');
+      const mobileMenu = document.getElementById('mobileMenu');
+      
+      if (menuButton && mobileMenu) {
+        menuButton.addEventListener('click', function() {
+          mobileMenu.classList.toggle('hidden');
+          const isExpanded = this.getAttribute('aria-expanded') === 'true';
+          this.setAttribute('aria-expanded', !isExpanded);
+        });
+      }
+    });
+  </script>
 </body>
 </html>

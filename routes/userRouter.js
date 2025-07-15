@@ -37,7 +37,7 @@ router.get("/login", authController.loginGet);
 router.post("/login", LoginValidator, authController.loginPost);
 
 // Logout
-router.get("/logout", authController.logout);
+router.post("/logout", authController.logout);
 
 router.get("/profile/", isUserloggedin, userController.reportsGet);
 

@@ -39,9 +39,7 @@ router.post(
 router.get("/logout", adminController.logout);
 
 // Admin Dashboard (Protected Route)
-router.get("/dashboard", isAdminloggedin, (req, res) => {
-  res.render("Dashboard");
-});
+router.get("/dashboard", isAdminloggedin, adminController.dashboardGet);
 
 router.get("/create-quiz",isAdminloggedin,quizController.createQuizGet);
 

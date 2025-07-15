@@ -1,5 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  variants: {
+    extend: {
+      display: ['responsive']
+    }
+  },
   content: ['./views/**/*.ejs',
     './public/**/*.html',
     './src/**/*.js',],

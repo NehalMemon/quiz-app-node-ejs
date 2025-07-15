@@ -1,6 +1,7 @@
 
 const usermodel = require("../models/user-model");
 const adminModel = require("../models/admin-model");
+const quizModel = require("../models/quiz-model");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
@@ -44,6 +45,7 @@ authController.signupPost = async (req, res) => {
 
       req.flash("success", "New OTP sent to your email.");
       return res.render("User-signup", {
+        layout: false,
         error: null,
         success: req.flash("success")[0],
         showOtp: true,
@@ -74,6 +76,7 @@ authController.signupPost = async (req, res) => {
       ) {
         req.flash("error", "Invalid or expired OTP.");
         return res.render("User-signup", {
+          layout: false,
           error: req.flash("error")[0],
           success: null,
           showOtp: true,
@@ -123,6 +126,7 @@ authController.signupPost = async (req, res) => {
 
     req.flash("success", "OTP sent to your email.");
     return res.render("User-signup", {
+      layout: false,
       success: req.flash("success")[0],
       error: null,
       showOtp: true,
@@ -365,6 +369,7 @@ adminController.signupPost = async (req, res) => {
 };
 
 adminController.loginGet = (req, res) => {
+ 
   res.render("Admin-login", {
     layout: false,
     error: req.flash("error")[0] || null,
@@ -420,6 +425,24 @@ adminController.logout = async (req, res) => {
     return res.redirect("/admin/login");
   }
 };
+
+
+adminController.dashboardGet = async (req, res) => {
+  const users = await usermodel.find({});
+  const quizzes = await quizModel.find({});
+  const activeQuizzes = await quizModel.find({isActive:true });
+  const inactiveQuizzes = await quizModel.find({isActive:false });
+  res.render("Dashboard",
+    {
+      error: req.flash("error")[0] || null,
+      success: req.flash("success")[0] || null,
+      users,
+      quizzes,
+      activeQuizzes,
+      inactiveQuizzes,
+    }
+  );
+}
 
 
 authController.forgotPasswordPost =async (req, res) => {

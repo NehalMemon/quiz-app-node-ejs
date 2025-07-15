@@ -29,10 +29,10 @@ app.use(flash())
 app.use((req, res, next) => {
     const user = req.session.user || null;
     res.locals.title = "MedQuiz";
+    res.locals.currentRoute = req.path;
     res.locals.user = user;
     res.locals.admin = user?.isAdmin || false;
-    res.locals.error = req.flash('error');
-    res.locals.success = req.flash('success');
+  
     next();
   });
   
@@ -50,6 +50,6 @@ app.use("/admin" , adminRouter)
 
 
 
-app.listen(3000 , ()=>{
+app.listen(3000 , '0.0.0.0', ()=>{
     console.log("server is running on port 3000")
 })
