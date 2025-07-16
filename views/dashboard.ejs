@@ -1,36 +1,66 @@
-<div class="container mx-auto px-6 py-12">
+<div class="container mx-auto px-4 py-8 max-w-6xl">
   <!-- Header -->
   <header class="text-center mb-12">
-    <h1 class="text-4xl font-bold text-gray-800">Admin Dashboard</h1>
-    <p class="text-gray-500 mt-2 text-lg">Overview of platform activity</p>
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
+    <p class="text-gray-600 text-lg">Platform performance overview</p>
+    <div class="w-24 h-1 bg-blue-500 mx-auto mt-4 rounded-full"></div>
   </header>
 
-  <div class="grid gap-10 md:grid-cols-2">
+  <div class="grid gap-8 md:grid-cols-2">
     <!-- Quiz Section -->
-    <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition duration-300">
-      <div class="mb-6">
-        <h2 class="text-2xl font-semibold text-blue-600 mb-2">Quizzes</h2>
-        <p class="text-5xl font-bold text-gray-900"><%= quizzes.length %></p>
-        <div class="flex gap-6 mt-2 text-sm text-gray-600">
-          <p class="flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full"></span> Active: <%= activeQuizzes.length %></p>
-          <p class="flex items-center gap-2"><span class="w-2 h-2 bg-red-500 rounded-full"></span> Inactive: <%= inactiveQuizzes.length %></p>
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+      <div class="p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Quiz Management</h2>
+        
+        <div class="mb-6">
+          <p class="text-4xl font-bold text-gray-900 mb-2"><%= quizzes.length %></p>
+          <div class="flex items-center gap-4 text-sm">
+            <div class="flex items-center text-green-600">
+              <span class="font-medium mr-1"><%=activeQuizzes.length %></span>
+              <span>Active</span>
+            </div>
+            <div class="flex items-center text-red-600">
+              <span class="font-medium mr-1"><%=inactiveQuizzes.length %></span>
+              <span>Inactive</span>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="space-y-3 pt-4">
-        <a href="/admin/create-quiz" class="block w-full text-center bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition">Create Quiz</a>
-        <a href="/quiz-section" class="block w-full text-center bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition">View All Quizzes</a>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <a href="/admin/create-quiz" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg text-center transition duration-150">
+            Create Quiz
+          </a>
+          <a href="/quiz-section" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-4 rounded-lg text-center transition duration-150">
+            View All
+          </a>
+        </div>
       </div>
     </div>
 
-          <!-- User Section -->
-    <div class="bg-white rounded-xl shadow-md p-8 hover:shadow-lg transition duration-300">
-      <div class="mb-6">
-        <h2 class="text-2xl font-semibold text-green-600 mb-2">Users</h2>
-        <p class="text-5xl font-bold text-gray-900"><%= users.length %></p>
-        <p class="text-sm text-gray-600 mt-2">Total registered users</p>
-      </div>
-      <div class="pt-4">
-        <a href="/admin/users" class="block w-full text-center bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition">View All Users</a>
+    <!-- User Section -->
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200">
+      <div class="p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">User Management</h2>
+        
+        <div class="mb-6">
+          <p class="text-4xl font-bold text-gray-900 mb-2"><%= users.length %></p>
+          <div class="flex items-center gap-4 text-sm">
+            <div class="flex items-center text-green-600">
+              <span class="font-medium mr-1"><%= users.filter(user => user.isActive === true).length %></span>
+              <span>Active</span>
+            </div>
+            <div class="flex items-center text-red-600">
+              <span class="font-medium mr-1"><%= users.filter(user => user.isActive === false).length %></span>
+              <span>Inactive</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-6">
+          <a href="/admin/users" class="block w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5 px-4 rounded-lg text-center transition duration-150">
+            Manage Users
+          </a>
+        </div>
       </div>
     </div>
   </div>

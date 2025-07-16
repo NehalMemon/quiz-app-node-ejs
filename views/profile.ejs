@@ -61,26 +61,29 @@
     <!-- Bottom Half - Quiz Reports -->
     <div class="bg-white rounded-xl shadow-md p-6">
       <h2 class="text-2xl font-bold text-gray-800 mb-4">Quiz Reports</h2>
-
+    
       <% if (user.reports.length === 0) { %>
         <p class="text-gray-500">No reports available yet.</p>
       <% } else { %>
         <div class="space-y-4 max-h-96 overflow-y-auto pr-2">
-          <% user.reports.forEach(r => { %>
-            <div class="bg-gray-50 rounded-xl shadow-sm p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-              <div>
-                <h3 class="text-lg font-semibold text-gray-800"><%= r.quizTitle %></h3>
-                <p class="text-sm text-gray-500"><%= new Date(r.date).toLocaleDateString() %></p>
+          <% user.reports.forEach((r, i) => { %>
+            <a href="/user/report-detail/<%= i %>" class="block bg-gray-50 rounded-xl shadow hover:shadow-md transition p-4">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-800"><%= r.quizTitle %></h3>
+                  <p class="text-sm text-gray-500">Date: <%= new Date(r.date).toLocaleDateString() %></p>
+                </div>
+                <div class="text-sm text-gray-700 text-right">
+                  <p><span class="font-medium">Score:</span> <%= r.correctAnswers %>/<%= r.totalQuestions %></p>
+                  <p><span class="font-medium">Attempted:</span> <%= r.attemptedAnswers %></p>
+                  <p class="text-blue-600 text-sm font-medium mt-1">View Details →</p>
+                </div>
               </div>
-              <div class="mt-2 sm:mt-0 text-sm text-gray-700 space-y-1 sm:text-right">
-                <p><span class="font-medium">Total Questions:</span> <span class="font-bold"><%= r.totalQuestions %></span></p>
-                <p><span class="font-medium">Attempted:</span> <span class="font-bold"><%= r.attemptedAnswers %></span></p>
-                <p><span class="font-medium">Correct:</span> <span class="font-bold"><%= r.correctAnswers %></span></p>
-              </div>
-            </div>
+            </a>
           <% }); %>
         </div>
       <% } %>
     </div>
+    
 
   </div>

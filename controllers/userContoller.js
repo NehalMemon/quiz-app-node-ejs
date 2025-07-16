@@ -22,6 +22,27 @@ userController.reportsGet = async (req, res) => {
     };
 
 
+
+userController.viewReportDetail =  async (req, res) => {
+  const user = await User.findById(req.user._id);
+  const index = parseInt(req.params.id);
+  const report = user.reports[index];
+
+  if (!report || !report.detailedResults) {
+    req.flash("error", "Report not found.");
+    return res.redirect("/user/profile");
+  }
+
+  res.render("Report-detail", {
+    error: req.flash("error")[0] || null,
+    success: req.flash("success")[0] || null,
+    report
+  });
+};
+
+
+
+
 userController.viewUsersGet = async (req , res) => {
   try{
     const { name, email } = req.query;

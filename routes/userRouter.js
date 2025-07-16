@@ -41,6 +41,9 @@ router.post("/logout", authController.logout);
 
 router.get("/profile/", isUserloggedin, userController.reportsGet);
 
+router.get("/report-detail/:id", isUserloggedin, userController.viewReportDetail);
+
+
 router.get("/forgot-password", authController.forgotPasswordGet);
 router.post("/forgot-password", authController.forgotPasswordPost);
 

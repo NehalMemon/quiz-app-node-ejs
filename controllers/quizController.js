@@ -153,6 +153,8 @@ quizController.generateReportPost = async (req, res) => {
       totalQuestions: quiz.questions.length,
       correctAnswers,
       attemptedAnswers: results.length,
+      date: new Date(), // make sure to store date
+      detailedResults: results 
     };
 
     user.reports.push(report);
@@ -195,6 +197,8 @@ quizController.submitQuizPost = async (req, res) => {
     req.session.lastResults = results;
 
     res.render("Quiz-result", {
+      success : req.flash("success")[0] || null,
+      error : req.flash("error")[0] || null,
       quiz,
       results,
     });

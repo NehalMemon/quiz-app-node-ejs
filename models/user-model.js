@@ -2,14 +2,7 @@ const mongoose = require('mongoose');
 
 
 
-const reportSchema = new mongoose.Schema({
-    quizId: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz", required: true },
-    quizTitle: String,
-    totalQuestions: Number,
-    correctAnswers: Number,
-    attemptedAnswers: Number,
-    date: { type: Date, default: Date.now },
-  });
+
 
 
 const UserSchema = new mongoose.Schema({
@@ -60,7 +53,15 @@ const UserSchema = new mongoose.Schema({
         default: false
     },
 
-    reports: [reportSchema],
+    reports: [  {
+        quizId: mongoose.Schema.Types.ObjectId,
+        quizTitle: String,
+        totalQuestions: Number,
+        correctAnswers: Number,
+        attemptedAnswers: Number,
+        date: Date,
+        detailedResults: [Object] // <-- add this
+      }],
 
     lastLogin: {
         type: Date,
