@@ -12,52 +12,60 @@ quizController.createQuizGet = (req, res) => {
 };
 
 quizController.createQuizPost = async (req, res) => {
+  const { title, subject, topic, questions } = req.body;
+ try { 
+  let questions;
   try {
-    const { title, subject, topic } = req.body;
-    let questions = req.body.questions;
-
-    if (!questions || typeof questions !== 'object') {
-      req.flash("error", "Please provide at least one question.");
+    questions = JSON.parse(req.body.questions);
+  } catch (err) {
+    req.flash("error", "Invalid question format.");
+    req.flash("old", { title, subject, topic });
+    return res.redirect("/admin/create-quiz");
+  }
+  
+  if (!Array.isArray(questions) || questions.length === 0) {
+    req.flash("error", "Please provide at least one question.");
+    req.flash("old", { title, subject, topic, questions });
+    return res.redirect("/admin/create-quiz");
+  }
+  
+  for (let i = 0; i < questions.length; i++) {
+    const q = questions[i];
+  
+    if (
+      !q.questionText ||
+      !Array.isArray(q.options) ||
+      q.options.length !== 4 ||
+      typeof q.correctIndex !== "number" ||
+      q.correctIndex < 0 || q.correctIndex > 3
+    ) {
+      req.flash("error", `Invalid data in Question ${i + 1}.`);
       req.flash("old", { title, subject, topic, questions });
       return res.redirect("/admin/create-quiz");
     }
-
-    if (!Array.isArray(questions)) {
-      questions = Object.keys(questions)
-        .sort()
-        .map((key) => questions[key]);
-    }
-
-    for (let i = 0; i < questions.length; i++) {
-      const q = questions[i];
-      q.correctAns = q.correctAns.trim();
-      q.options = q.options.map(opt => opt.trim());
-
-      if (!q.options.includes(q.correctAns)) {
-        req.flash("error", `Correct answer for Question ${i + 1} must be one of the options.`);
-        req.flash("old", { title, subject, topic, questions });
-        return res.redirect("/admin/create-quiz");
-      }
-    }
-
-    const newQuiz = new Quiz({
+  
+    // Convert correctIndex to correctAns for saving
+    q.correctAns = q.options[q.correctIndex];
+     // Save to database
+     const newQuiz = new Quiz({
       title,
       subject,
       topic,
-      questions
+      questions,
     });
 
     await newQuiz.save();
+
     req.flash("success", "Quiz created successfully.");
     return res.redirect("/admin/create-quiz");
-  } catch (err) {
-    console.error("Quiz Creation Error:", err);
-    req.flash("error", "Failed to create quiz.");
-    req.flash("old", req.body);
-    return res.redirect("/admin/create-quiz");
+  }}
+  catch(err){
+    console.error("Error creating quiz:", err);
+    req.flash("error", "Something went wrong.");
+    res.redirect("/admin/create-quiz");
   }
-};
-
+}
+  
 
 quizController.viewQuizSectionGet = async (req, res) => {
   try {
@@ -231,11 +239,42 @@ quizController.editQuizPost = async (req, res) => {
       return res.redirect("/admin/dashboard");
     }
 
+    // Parse questions
+    let parsedQuestions;
+    try {
+      parsedQuestions = JSON.parse(questions);
+    } catch (err) {
+      req.flash("error", "Invalid question format.");
+      req.flash("old", req.body);
+      return res.redirect(`/admin/quiz/${req.params.id}/edit`);
+    }
+
+    // Validate and enrich each question
+    for (let i = 0; i < parsedQuestions.length; i++) {
+      const q = parsedQuestions[i];
+
+      if (
+        !q.questionText ||
+        !Array.isArray(q.options) ||
+        q.options.length !== 4 ||
+        typeof q.correctIndex !== "number" ||
+        q.correctIndex < 0 || q.correctIndex > 3
+      ) {
+        req.flash("error", `Invalid data in Question ${i + 1}.`);
+        req.flash("old", req.body);
+        return res.redirect(`/admin/quiz/${req.params.id}/edit`);
+      }
+
+      // ✅ Set correctAns for mongoose schema validation
+      q.correctAns = q.options[q.correctIndex];
+    }
+
+    // Update quiz fields
     quiz.title = title;
     quiz.subject = subject;
     quiz.topic = topic;
     quiz.description = description;
-    quiz.questions = JSON.parse(questions); // questions come as JSON string
+    quiz.questions = parsedQuestions;
 
     await quiz.save();
 
@@ -247,6 +286,7 @@ quizController.editQuizPost = async (req, res) => {
     res.redirect(`/admin/quiz/${req.params.id}/edit`);
   }
 };
+
 
 quizController.deleteQuizPost = async (req,res) => {
   try{

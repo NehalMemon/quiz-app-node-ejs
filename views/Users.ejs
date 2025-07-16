@@ -1,40 +1,50 @@
+<div class="max-w-4xl mx-auto px-6 py-10">
+  <h1 class="text-3xl font-bold text-blue-600 mb-6 text-center">All Users</h1>
 
+  <!-- Filter Form -->
+  <form method="GET" action="/admin/users" class="flex flex-wrap justify-center gap-4 mb-8">
+    <input type="text" name="name" placeholder="Search by Name"
+           value="<%= typeof name !== 'undefined' ? name : '' %>"
+           class="px-4 py-2 border border-gray-300 rounded-md w-64" />
 
-  <div class="max-w-4xl mx-auto px-6 py-10">
-    <h1 class="text-3xl font-bold text-blue-600 mb-6 text-center">All Users</h1>
+    <input type="email" name="email" placeholder="Search by Email"
+           value="<%= typeof email !== 'undefined' ? email : '' %>"
+           class="px-4 py-2 border border-gray-300 rounded-md w-64" />
 
-      <!-- Filter Form -->
-      <form method="GET" action="/admin/users" class="flex flex-wrap justify-center gap-4 mb-8">
-        <input type="text" name="name" placeholder="Search by Name"
-               value="<%= typeof name !== 'undefined' ? name : '' %>"
-               class="px-4 py-2 border border-gray-300 rounded-md w-64" />
-               
-        <input type="email" name="email" placeholder="Search by email"
-               value="<%= typeof email !== 'undefined' ? email : '' %>"
-               class="px-4 py-2 border border-gray-300 rounded-md w-64" />
-  
-        <button type="submit"
-                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-          Search
-        </button>
-      </form>
-  
+    <button type="submit"
+            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+      Search
+    </button>
+  </form>
 
-    <% if (users.length === 0) { %>
-      <p class="text-center text-gray-500 text-lg">No users found.</p>
-    <% } else { %>
-      <ul class="space-y-4">
-        <% users.forEach(user => { %>
-          <li class="flex items-center justify-between bg-white p-4 rounded-md shadow-sm border">
-            <span class="text-lg font-medium"><%= user.userName %></span>
-            <a href="/admin/user/<%= user._id %>" 
-               class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-              Details
+  <% if (users.length === 0) { %>
+    <p class="text-center text-gray-500 text-lg">No users found.</p>
+  <% } else { %>
+    <ul class="space-y-4">
+      <% users.forEach(user => { %>
+        <li class="flex justify-between items-center bg-white p-4 rounded-md shadow-sm border flex-wrap sm:flex-nowrap">
+          
+          <!-- Left: Name and Email -->
+          <div class="mb-2 sm:mb-0">
+            <p class="text-lg font-semibold text-gray-800"><%= user.userName %></p>
+            <p class="text-sm text-gray-500"><%= user.email %></p>
+          </div>
+    
+          <!-- Right: Profile button and Status -->
+          <div class="text-right">
+            <a href="/admin/user/<%= user._id %>"
+               class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition block sm:inline-block">
+              Profile
             </a>
-          </li>
-        <% }); %>
-      </ul>
-    <% } %>
-  </div>
-
-
+            <p class="mt-1 text-sm text-gray-600">
+              <span class="<%= user.isActive ? 'text-green-600' : 'text-red-500' %> font-medium">
+                <%= user.isActive ? "Active" : "Inactive" %>
+              </span>
+            </p>
+          </div>
+        </li>
+      <% }); %>
+    </ul>
+    
+  <% } %>
+</div>
