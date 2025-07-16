@@ -349,10 +349,10 @@ adminController.signupPost = async (req, res) => {
     const hash = await bcrypt.hash(password , 10);
     const admin = await adminModel.create({ userName, email, password: hash });
 
-    console.log("ADMIN CREATED ✅:", admin);
+ 
     const token = AdmintokenGenerator(admin);
     res.cookie("adminToken", token, { httpOnly: true, maxAge: 3600000 });
-    console.log("ADMIN TOKEN SET ✅:", token);
+   
     req.session.user = {
       _id: admin._id,
       name: admin.name,
