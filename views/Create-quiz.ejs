@@ -1,0 +1,61 @@
+
+
+<div class="max-w-4xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-md relative">
+  <div class="absolute top-4 right-4">
+    <a href="/admin/dashboard" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+      ← Dashboard
+    </a>
+  </div>
+
+  <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Create New Quiz</h1>
+
+  <form action="/admin/create-quiz" method="POST" id="quizForm">
+    <div class="grid grid-cols-1 gap-4 mb-6">
+      <input
+        type="text"
+        name="title"
+        placeholder="Quiz Title"
+        value="<%= old?.title || '' %>"
+        required
+        class="w-full border border-gray-300 rounded px-4 py-2"
+      />
+      <input
+        type="text"
+        name="subject"
+        placeholder="Subject"
+        value="<%= old?.subject || '' %>"
+        required
+        class="w-full border border-gray-300 rounded px-4 py-2"
+      />
+      <input
+        type="text"
+        name="topic"
+        placeholder="Topic"
+        value="<%= old?.topic || '' %>"
+        required
+        class="w-full border border-gray-300 rounded px-4 py-2"
+      />
+    </div>
+
+    <div id="questionsContainer">
+      <!-- Questions will be dynamically added here -->
+    </div>
+
+    <div class="text-right mt-4">
+      <button type="button" onclick="addQuestion()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+        + Add Question
+      </button>
+    </div>
+    <input type="hidden" name="questions" id="questionsInput">
+    <div class="text-center mt-6">
+      <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+        Create Quiz
+      </button>
+    </div>
+  </form>
+</div>
+
+<script id="oldData" type="application/json">
+  <%- JSON.stringify(old && old.questions ? old.questions : []) %>
+</script>
+<script src="/scripts/formScript.js"></script>

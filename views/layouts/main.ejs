@@ -1,0 +1,46 @@
+
+
+  <!-- Header -->
+  <%- include('../partials/Header') %>
+
+  <!-- Flash Messages -->
+  <% if (error && error.length) { %>
+    <div class="mx-auto max-w-3xl flex items-center justify-between bg-red-50 border border-red-300 text-red-700 px-6 py-4 rounded-lg shadow-sm mb-6 animate-fade-in">
+      <div>
+        <p class="font-semibold text-red-800">Error</p>
+        <p class="text-sm mt-1"><%= error %></p>
+      </div>
+      <i class="fas fa-times-circle text-red-400 text-xl"></i>
+    </div>
+  <% } %>
+  
+  <% if (success && success.length) { %>
+    <div class="mx-auto max-w-3xl flex items-center justify-between bg-green-50 border border-green-300 text-green-700 px-6 py-4 rounded-lg shadow-sm mb-6 animate-fade-in">
+      <div>
+        <p class="font-semibold text-green-800">Success</p>
+        <p class="text-sm mt-1"><%= success %></p>
+      </div>
+      <i class="fas fa-check-circle text-green-400 text-xl"></i>
+    </div>
+  <% } %>
+
+  <!-- Page Content -->
+  <main class="flex-grow">
+    <%- body %>
+  </main>
+
+  <!-- Footer -->
+  <% if (!admin) { %>
+    <%- include('../partials/Footer') %>
+  <% } %>
+
+
+  <script>
+document.getElementById("mobileMenuButton")?.addEventListener("click", () => {
+  const menu = document.getElementById("mobileMenu");
+  menu.classList.toggle("hidden");
+});
+
+  </script>
+</body>
+</html>

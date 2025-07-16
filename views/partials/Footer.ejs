@@ -1,0 +1,58 @@
+<footer class="bg-white mt-auto">
+  <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+      
+      <div>
+        <h3 class="text-sm font-semibold text-gray-500 uppercase">Platform</h3>
+        <ul class="mt-4 space-y-2">
+          <li><a href="/features" class="text-base text-gray-600 hover:text-primary-600">Features</a></li>
+          <li><a href="/pricing" class="text-base text-gray-600 hover:text-primary-600">Pricing</a></li>
+          <li><a href="/quiz-section" class="text-base text-gray-600 hover:text-primary-600">Past Papers</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold text-gray-500 uppercase">Support</h3>
+        <ul class="mt-4 space-y-2">
+          <li><a href="/contact" class="text-base text-gray-600 hover:text-primary-600">Contact Us</a></li>
+          <li><a href="/faq" class="text-base text-gray-600 hover:text-primary-600">FAQs</a></li>
+          <li><a href="/help" class="text-base text-gray-600 hover:text-primary-600">Help Center</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold text-gray-500 uppercase">Legal</h3>
+        <ul class="mt-4 space-y-2">
+          <li><a href="/privacy" class="text-base text-gray-600 hover:text-primary-600">Privacy</a></li>
+          <li><a href="/terms" class="text-base text-gray-600 hover:text-primary-600">Terms</a></li>
+          <li><a href="/cookies" class="text-base text-gray-600 hover:text-primary-600">Cookie Policy</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold text-gray-500 uppercase">Connect</h3>
+        <div class="mt-4 flex space-x-6">
+          <a href="#" class="text-gray-500 hover:text-primary-600"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary-600"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary-600"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary-600"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 border-t border-gray-200 pt-8 md:flex md:items-center md:justify-between">
+      <div class="flex space-x-6 md:order-2">
+        <% if (admin) { %>
+          <a href="/admin/dashboard" class="text-gray-500 hover:text-primary-600 text-sm">Admin Dashboard</a>
+        <% } else if (user) { %>
+          <a href="/user/profile" class="text-gray-500 hover:text-primary-600 text-sm">Profile</a>
+        <% } else { %>
+          <a href="/admin/login" class="text-gray-500 hover:text-primary-600 text-sm">Admin Login</a>
+        <% } %>
+      </div>
+      <p class="mt-8 text-base text-gray-500 md:mt-0 md:order-1">
+        &copy; <%= new Date().getFullYear() %> PastPapersPro. All rights reserved.
+      </p>
+    </div>
+  </div>
+</footer>
