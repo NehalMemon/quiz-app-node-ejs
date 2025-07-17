@@ -27,6 +27,13 @@ app.use(expressSession({
 app.use(flash())
 
 app.use((req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+  });
+
+
+
+app.use((req, res, next) => {
     const user = req.session.user || null;
     res.locals.title = "MedQuiz";
     res.locals.currentRoute = req.path;

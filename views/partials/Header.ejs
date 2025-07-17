@@ -31,7 +31,7 @@
   
         <!-- Desktop Menu -->
         <div class="hidden md:flex space-x-4 items-center">
-          <a href="/home" class="px-3 py-2 rounded-md text-sm font-medium <%= currentRoute === '/home' ? 'text-blue-600 underline font-semibold' : 'text-gray-700 hover:bg-gray-100' %>">Home</a>
+          <a href="/" class="px-3 py-2 rounded-md text-sm font-medium <%= currentRoute === '/' ? 'text-blue-600 underline font-semibold' : 'text-gray-700 hover:bg-gray-100' %>">Home</a>
           <a href="/quiz-section" class="px-3 py-2 rounded-md text-sm font-medium <%= currentRoute === '/quiz-section' ? 'text-blue-600 underline font-semibold' : 'text-gray-700 hover:bg-gray-100' %>">Quiz Section</a>
   
           <% if (admin) { %>
@@ -43,6 +43,9 @@
             <a href="/user/profile" class="px-3 py-2 rounded-md text-sm font-medium text-green-600 hover:underline">Profile</a>
             <form action="/user/logout" method="POST" class="inline">
               <button class="px-3 py-2 rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600">Logout</button>
+            </form>
+            <form action="/user/delete-user/<%= user._id %>" method="POST" class="inline">
+              <button class="px-3 py-2 rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600">Sign out</button>
             </form>
           <% } else { %>
             <a href="/features" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Features</a>
@@ -57,7 +60,7 @@
     <!-- Mobile Dropdown (always available, dynamic content) -->
     <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200">
       <div class="px-4 pt-2 pb-4 space-y-1">
-        <a href="/home" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Home</a>
+        <a href="/" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Home</a>
         <a href="/quiz-section" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Quiz Section</a>
   
         <% if (admin) { %>
@@ -69,6 +72,9 @@
           <a href="/user/profile" class="block px-3 py-2 rounded-md text-sm font-medium text-green-600 hover:underline">Profile</a>
           <form action="/user/logout" method="POST">
             <button class="block w-full text-left px-3 py-2 text-sm text-white bg-red-500 hover:bg-red-600 rounded">Logout</button>
+          </form>
+          <form  action="/user/delete-user/<%= user._id %>" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to Sign out ? This action cannot be undone.')">
+            <button class="px-3 py-2 rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600">Sign out</button>
           </form>
         <% } else { %>
           <a href="/features" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Features</a>

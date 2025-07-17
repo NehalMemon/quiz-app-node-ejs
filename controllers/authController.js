@@ -104,7 +104,7 @@ authController.signupPost = async (req, res) => {
       
 
       req.flash("success", "User created successfully");
-      return res.redirect("/home");
+      return res.redirect("/");
     }
 
     const existingUser = await usermodel.findOne({ email });
@@ -275,7 +275,7 @@ authController.loginPost = async (req, res) => {
       };
 
       req.flash("success", "Logged in successfully.");
-      return res.redirect("/home");
+      return res.redirect("/");
     }
 
     // ✅ Validate Password and send OTP
@@ -328,13 +328,29 @@ authController.logout = async (req, res) => {
   try {
     const decoded = jwt.verify(req.cookies.userToken, process.env.JWT_KEY);
     await usermodel.findOneAndUpdate({ email: decoded.email }, { isLoggedIn: false });
-    res.clearCookie("userToken");
-    return res.redirect("/user/login");
+
+    req.flash("success", "Logged out successfully");
+
+    // Destroy the session and only redirect once
+    req.session.destroy(err => {
+      if (err) {
+        console.error("Session destroy error:", err);
+        req.flash("error", "Could not log out properly.");
+        return res.redirect("/user/login");
+      }
+
+      // Only send headers once
+      res.clearCookie("userToken");
+      return res.redirect("/user/login");
+    });
+
   } catch (err) {
+    console.error("Logout error:", err);
     req.flash("error", err.message);
     return res.redirect("/user/login");
   }
 };
+
 
 // ================= ADMIN CONTROLLER =================
 const adminController = {};
@@ -364,7 +380,7 @@ adminController.signupPost = async (req, res) => {
   } catch (err) {
     console.error("Admin Signup Error:", err);
     req.flash("error", "Signup failed");
-    return res.redirect("/home");
+    return res.redirect("/");
   }
 };
 
@@ -418,13 +434,29 @@ adminController.logout = async (req, res) => {
   try {
     const decoded = jwt.verify(req.cookies.adminToken, process.env.JWT_KEY);
     await adminModel.findOneAndUpdate({ email: decoded.email }, { isLoggedIn: false });
-    res.clearCookie("adminToken");
-    return res.redirect("/admin/login");
+
+    req.flash("success", "Logged out successfully");
+
+    // ✅ Only redirect inside the callback — remove the one below
+    req.session.destroy(err => {
+      if (err) {
+        console.error("Session destroy error:", err);
+        req.flash("error", "Could not log out properly.");
+        return res.redirect("/admin/login");
+      }
+
+      res.clearCookie("adminToken");
+      return res.redirect("/admin/login");
+    });
+
+    // ❌ Remove this — it causes the error
+    // return res.redirect("/admin/login");
   } catch (err) {
     req.flash("error", err.message);
     return res.redirect("/admin/login");
   }
 };
+
 
 
 adminController.dashboardGet = async (req, res) => {

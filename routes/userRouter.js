@@ -37,6 +37,7 @@ router.get("/login", authController.loginGet);
 router.post("/login", LoginValidator, authController.loginPost);
 
 // Logout
+router.get("/logout", authController.logout);
 router.post("/logout", authController.logout);
 
 router.get("/profile/", isUserloggedin, userController.reportsGet);
@@ -49,6 +50,8 @@ router.post("/forgot-password", authController.forgotPasswordPost);
 
 router.get("/reset-password/", authController.resetPasswordGet);
 router.post("/reset-password/", authController.resetPasswordPost);
+
+router.post("/delete-user/:id",isUserloggedin, userController.deleteUsersPost );
 
 
 module.exports = router;

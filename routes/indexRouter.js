@@ -9,12 +9,10 @@ const  isActive = require("../middlewares/isActive");
 const { quizController} = require("../controllers/quizController");
 
 
+
+
+
 router.get("/", (req, res) => {
-  res.redirect("/home");
-});
-
-
-router.get("/home", (req, res) => {
     res.render("Home", {
       error: req.flash("error")[0] || null,
       success: req.flash("success")[0] || null,

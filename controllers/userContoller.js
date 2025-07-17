@@ -98,13 +98,23 @@ userController.controlUsersGet = async (req , res) => {
 userController.deleteUsersPost = async (req , res) => {
   try{
     await User.findByIdAndDelete(req.params.id);
-    req.flash("success" , "User deleted successfully");
-    res.redirect("/admin/users");
+    req.flash("success", "User deleted successfully"); // ✅ Flash first
+
+    req.session.destroy(err => {
+      if (err) {
+        console.error("Session destroy error:", err);
+        req.flash("error", "Could not complete logout.");
+        return res.redirect(`/user/profile/${req.params.id}`);
+      }
+
+      res.clearCookie("userToken");
+      return res.redirect("/");
+    });
   }
   catch (err) {
     console.error("Error:", err);
     req.flash("error", "Could not delete user");
-    return res.redirect(`/admin/user/${req.params.id}`);
+    return res.redirect(`/user/profile/${req.params.id}`); 
   }
 }
 
@@ -116,7 +126,7 @@ userController.activationUsersPost = async (req , res) => {
     user.isActive = false;
     await user.save();
     req.flash("success" , "User deactivated successfully");
-    res.redirect(`/admin/user/${req.params.id}`);
+    res.redirect("/");
    }
    else{
     user.isActive = true;

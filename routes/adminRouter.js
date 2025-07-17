@@ -38,6 +38,8 @@ router.post(
 // Admin Logout
 router.get("/logout", adminController.logout);
 
+router.post("/logout", adminController.logout);
+
 // Admin Dashboard (Protected Route)
 router.get("/dashboard", isAdminloggedin, adminController.dashboardGet);
 
@@ -60,7 +62,7 @@ router.get("/users",isAdminloggedin, userController.viewUsersGet);
 
 router.get("/user/:id",isAdminloggedin, userController.controlUsersGet );
 
-router.post("/delete-user/:id",isAdminloggedin, userController.deleteUsersPost );
+
 
 router.post("/activation-user/:id",isAdminloggedin, userController.activationUsersPost );
 

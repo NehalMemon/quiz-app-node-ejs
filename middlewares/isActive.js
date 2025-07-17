@@ -6,14 +6,14 @@ const isActive = async (req , res , next) => {
         if(ActiveUser){  
             if(!ActiveUser.isActive){
             req.flash("error" , "your account is not active, try again later , if problem persist contact admin")
-            return res.redirect("/home");
+            return res.redirect("/");
         }}
         next();
     }
     catch(err){
     console.error("isActive middleware error:", err);
     req.flash("error", "Something went wrong.");
-    return res.redirect("/home");
+    return res.redirect("/");
     }
 }
 

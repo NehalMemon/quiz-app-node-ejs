@@ -12,9 +12,9 @@ quizController.createQuizGet = (req, res) => {
 };
 
 quizController.createQuizPost = async (req, res) => {
-  const { title, subject, topic, questions } = req.body;
- try { 
+  const { title, subject, topic } = req.body;
   let questions;
+
   try {
     questions = JSON.parse(req.body.questions);
   } catch (err) {
@@ -22,32 +22,36 @@ quizController.createQuizPost = async (req, res) => {
     req.flash("old", { title, subject, topic });
     return res.redirect("/admin/create-quiz");
   }
-  
+
   if (!Array.isArray(questions) || questions.length === 0) {
     req.flash("error", "Please provide at least one question.");
     req.flash("old", { title, subject, topic, questions });
     return res.redirect("/admin/create-quiz");
   }
-  
+
   for (let i = 0; i < questions.length; i++) {
     const q = questions[i];
-  
+
     if (
       !q.questionText ||
       !Array.isArray(q.options) ||
       q.options.length !== 4 ||
       typeof q.correctIndex !== "number" ||
-      q.correctIndex < 0 || q.correctIndex > 3
+      q.correctIndex < 0 ||
+      q.correctIndex > 3
     ) {
       req.flash("error", `Invalid data in Question ${i + 1}.`);
       req.flash("old", { title, subject, topic, questions });
       return res.redirect("/admin/create-quiz");
     }
-  
-    // Convert correctIndex to correctAns for saving
+
+    // Convert correctIndex to correctAns
     q.correctAns = q.options[q.correctIndex];
-     // Save to database
-     const newQuiz = new Quiz({
+    delete q.correctIndex; // Optionally clean up
+  }
+
+  try {
+    const newQuiz = new Quiz({
       title,
       subject,
       topic,
@@ -57,14 +61,14 @@ quizController.createQuizPost = async (req, res) => {
     await newQuiz.save();
 
     req.flash("success", "Quiz created successfully.");
-    return res.redirect("/admin/create-quiz");
-  }}
-  catch(err){
+    return res.redirect("/quiz-section");
+  } catch (err) {
     console.error("Error creating quiz:", err);
     req.flash("error", "Something went wrong.");
-    res.redirect("/admin/create-quiz");
+    return res.redirect("/admin/create-quiz");
   }
-}
+};
+
   
 
 quizController.viewQuizSectionGet = async (req, res) => {
