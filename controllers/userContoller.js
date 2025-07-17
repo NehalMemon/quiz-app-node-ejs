@@ -126,7 +126,7 @@ userController.activationUsersPost = async (req , res) => {
     user.isActive = false;
     await user.save();
     req.flash("success" , "User deactivated successfully");
-    res.redirect("/");
+    res.redirect(`/admin/user/${req.params.id}`);
    }
    else{
     user.isActive = true;

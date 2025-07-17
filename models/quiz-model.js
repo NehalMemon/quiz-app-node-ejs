@@ -1,17 +1,17 @@
 const mongoose = require("mongoose")
 
 
-const questionSchema = mongoose.Schema({
-    questionText : {
-        type:String,
-        required:true
-    },
-    options :[{type:String , required : true}],
-    correctAns : {
-        type:String,
-        required:true,
-    }
-})
+// const questionSchema = mongoose.Schema({
+//     questionText : {
+//         type:String,
+//         required:true
+//     },
+//     options :[{type:String , required : true}],
+//     correctAns : {
+//         type:String,
+//         required:true,
+//     }
+// })
 
 
 const quizSchema = mongoose.Schema({
@@ -24,17 +24,30 @@ const quizSchema = mongoose.Schema({
         type : String ,
     },
 
-    questions:[questionSchema],
+    questions: [
+        {
+          questionText: String,
+          options: [String],
+          correctAns: String,
+        }],
 
     subject : {
         type:String,
         required:true,
     },
 
-    topic : {
-        type:String,
-        required:true,
+  
+
+    year : {
+        type : Number
     },
+
+    category: {
+        type: [String],
+        enum: ['Midterm', 'Preprof', 'Prof'],
+        required: true
+      },
+      
 
     isActive :{
         type : Boolean,

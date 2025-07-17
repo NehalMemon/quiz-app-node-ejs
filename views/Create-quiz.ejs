@@ -28,13 +28,23 @@
         class="w-full border border-gray-300 rounded px-4 py-2"
       />
       <input
-        type="text"
-        name="topic"
-        placeholder="Topic"
-        value="<%= old?.topic || '' %>"
-        required
-        class="w-full border border-gray-300 rounded px-4 py-2"
-      />
+      type="number"
+      name="year"
+      placeholder="Year (e.g., 2023)"
+      value="<%= old?.year || '' %>"
+      required
+      class="w-full border border-gray-300 rounded px-4 py-2"
+    />
+    
+    <div class="mt-4">
+      <label class="block font-semibold mb-2">Select Categories</label>
+      <div class="flex gap-4">
+        <label><input type="checkbox" name="category" value="Midterm" <% if (old?.category?.includes('Midterm')) { %> checked <% } %> /> Midterm</label>
+        <label><input type="checkbox" name="category" value="Preprof" <% if (old?.category?.includes('Preprof')) { %> checked <% } %> /> Preprof</label>
+        <label><input type="checkbox" name="category" value="Prof" <% if (old?.category?.includes('Prof')) { %> checked <% } %> /> Prof</label>
+      </div>
+    </div>
+    
     </div>
 
     <div id="questionsContainer">

@@ -10,81 +10,89 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
 
-  <nav class="bg-white shadow-md">
+  <nav class="bg-gradient-to-r from-slate-900 to-slate-700 text-white shadow-lg relative z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
+        
         <!-- Logo -->
-        <div class="flex items-center">
-          <i class="fas fa-book-open text-blue-600 text-2xl mr-2"></i>
-          <span class="text-xl font-bold text-gray-900">Doctor's Quizz</span>
+        <div class="flex-shrink-0">
+          <span class="text-lg md:text-xl font-bold">Doctor's Quizz</span>
         </div>
   
-        <!-- Hamburger Icon (always visible on mobile) -->
-        <div class="md:hidden flex items-center">
-          <button id="mobileMenuButton" type="button"
-                  class="inline-flex items-center justify-center p-2 rounded-md text-gray-800 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        <!-- Desktop Nav -->
+        <div class="hidden md:flex space-x-6 items-center">
+          <a href="/" class="<%= currentRoute === '/' ? 'text-yellow-400 font-semibold' : 'hover:text-yellow-300' %>">Home</a>
+          <a href="/quiz-section" class="<%= currentRoute === '/quiz-section' ? 'text-yellow-400 font-semibold' : 'hover:text-yellow-300' %>">Quiz Section</a>
+  
+          <% if (admin) { %>
+            <a href="/admin/dashboard" class="<%= currentRoute === '/admin/dashboard' ? 'text-yellow-400 font-semibold' : 'hover:text-yellow-300' %>">Dashboard</a>
+            <form action="/admin/logout" method="POST" class="inline">
+              <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Logout</button>
+            </form>
+          <% } else if (user) { %>
+            <a href="/user/profile" class="hover:text-yellow-300 text-green-300 font-semibold">Profile</a>
+            <form action="/user/logout" method="POST" class="inline">
+              <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Logout</button>
+            </form>
+            <form action="/user/delete-user/<%= user._id %>" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to sign out?')">
+              <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Sign out</button>
+            </form>
+          <% } else { %>
+            <a href="/features" class="hover:text-yellow-300">Features</a>
+            <a href="/pricing" class="hover:text-yellow-300">Pricing</a>
+            <a href="/user/login" class="hover:text-yellow-300">Login</a>
+            <a href="/user/signup" class="bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded font-semibold">Get Started</a>
+          <% } %>
+        </div>
+  
+        <!-- Mobile Menu Button -->
+        <div class="md:hidden">
+          <button id="mobileMenuButton" class="text-white focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         </div>
-  
-        <!-- Desktop Menu -->
-        <div class="hidden md:flex space-x-4 items-center">
-          <a href="/" class="px-3 py-2 rounded-md text-sm font-medium <%= currentRoute === '/' ? 'text-blue-600 underline font-semibold' : 'text-gray-700 hover:bg-gray-100' %>">Home</a>
-          <a href="/quiz-section" class="px-3 py-2 rounded-md text-sm font-medium <%= currentRoute === '/quiz-section' ? 'text-blue-600 underline font-semibold' : 'text-gray-700 hover:bg-gray-100' %>">Quiz Section</a>
-  
-          <% if (admin) { %>
-            <a href="/admin/dashboard" class="px-3 py-2 rounded-md text-sm font-medium <%= currentRoute === '/admin/dashboard' ? 'text-blue-600 underline font-semibold' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600' %>">Dashboard</a>
-            <form action="/admin/logout" method="POST" class="inline">
-              <button class="px-3 py-2 rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600">Logout</button>
-            </form>
-          <% } else if (user) { %>
-            <a href="/user/profile" class="px-3 py-2 rounded-md text-sm font-medium text-green-600 hover:underline">Profile</a>
-            <form action="/user/logout" method="POST" class="inline">
-              <button class="px-3 py-2 rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600">Logout</button>
-            </form>
-            <form action="/user/delete-user/<%= user._id %>" method="POST" class="inline">
-              <button class="px-3 py-2 rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600">Sign out</button>
-            </form>
-          <% } else { %>
-            <a href="/features" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Features</a>
-            <a href="/pricing" class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Pricing</a>
-            <a href="/user/login" class="px-3 py-2 rounded-md text-sm font-medium text-blue-600 hover:underline">Login</a>
-            <a href="/user/signup" class="px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700">Sign Up</a>
-          <% } %>
-        </div>
       </div>
     </div>
   
-    <!-- Mobile Dropdown (always available, dynamic content) -->
-    <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200">
-      <div class="px-4 pt-2 pb-4 space-y-1">
-        <a href="/" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Home</a>
-        <a href="/quiz-section" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Quiz Section</a>
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden bg-white text-gray-800 absolute top-16 inset-x-0 p-6 rounded-b-lg shadow-lg z-50">
+      <ul class="space-y-4 text-center font-medium">
+        <li><a href="/" class="block <%= currentRoute === '/' ? 'text-yellow-500 font-semibold' : 'hover:text-blue-600' %>">Home</a></li>
+        <li><a href="/quiz-section" class="block <%= currentRoute === '/quiz-section' ? 'text-yellow-500 font-semibold' : 'hover:text-blue-600' %>">Quiz Section</a></li>
   
         <% if (admin) { %>
-          <a href="/admin/dashboard" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Dashboard</a>
-          <form action="/admin/logout" method="POST">
-            <button class="block w-full text-left px-3 py-2 text-sm text-white bg-red-500 hover:bg-red-600 rounded">Logout</button>
-          </form>
+          <li><a href="/admin/dashboard" class="block hover:text-blue-600">Dashboard</a></li>
+          <li>
+            <form action="/admin/logout" method="POST">
+              <button class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600">Logout</button>
+            </form>
+          </li>
         <% } else if (user) { %>
-          <a href="/user/profile" class="block px-3 py-2 rounded-md text-sm font-medium text-green-600 hover:underline">Profile</a>
-          <form action="/user/logout" method="POST">
-            <button class="block w-full text-left px-3 py-2 text-sm text-white bg-red-500 hover:bg-red-600 rounded">Logout</button>
-          </form>
-          <form  action="/user/delete-user/<%= user._id %>" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to Sign out ? This action cannot be undone.')">
-            <button class="px-3 py-2 rounded-md text-sm font-medium text-white bg-red-500 hover:bg-red-600">Sign out</button>
-          </form>
+          <li><a href="/user/profile" class="block text-green-600 font-semibold hover:underline">Profile</a></li>
+          <li>
+            <form action="/user/logout" method="POST">
+              <button class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600">Logout</button>
+            </form>
+          </li>
+          <li>
+            <form action="/user/delete-user/<%= user._id %>" method="POST" onsubmit="return confirm('Are you sure you want to sign out?')">
+              <button class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600">Sign out</button>
+            </form>
+          </li>
         <% } else { %>
-          <a href="/features" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Features</a>
-          <a href="/pricing" class="block px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100">Pricing</a>
-          <a href="/user/login" class="block px-3 py-2 rounded-md text-sm font-medium text-blue-600 hover:underline">Login</a>
-          <a href="/user/signup" class="block px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700">Sign Up</a>
+          <li><a href="/features" class="block hover:text-blue-600">Features</a></li>
+          <li><a href="/pricing" class="block hover:text-blue-600">Pricing</a></li>
+          <li><a href="/user/login" class="block text-blue-600 hover:underline">Login</a></li>
+          <li><a href="/user/signup" class="block bg-yellow-400 text-black font-semibold px-4 py-2 rounded hover:bg-yellow-500">Get Started</a></li>
         <% } %>
-      </div>
+      </ul>
     </div>
   </nav>
+  
   
 
   

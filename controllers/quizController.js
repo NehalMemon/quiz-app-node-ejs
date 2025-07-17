@@ -11,21 +11,29 @@ quizController.createQuizGet = (req, res) => {
   });
 };
 
+
 quizController.createQuizPost = async (req, res) => {
-  const { title, subject, topic } = req.body;
+  const { title, subject, year } = req.body;
+  let category = req.body.category;
+
+  // Ensure category is always an array
+  if (!Array.isArray(category)) {
+    category = category ? [category] : [];
+  }
+
   let questions;
 
   try {
     questions = JSON.parse(req.body.questions);
   } catch (err) {
     req.flash("error", "Invalid question format.");
-    req.flash("old", { title, subject, topic });
+    req.flash("old", { title, subject, year, category });
     return res.redirect("/admin/create-quiz");
   }
 
   if (!Array.isArray(questions) || questions.length === 0) {
     req.flash("error", "Please provide at least one question.");
-    req.flash("old", { title, subject, topic, questions });
+    req.flash("old", { title, subject, year, category });
     return res.redirect("/admin/create-quiz");
   }
 
@@ -41,20 +49,21 @@ quizController.createQuizPost = async (req, res) => {
       q.correctIndex > 3
     ) {
       req.flash("error", `Invalid data in Question ${i + 1}.`);
-      req.flash("old", { title, subject, topic, questions });
+      req.flash("old", { title, subject, year, category });
       return res.redirect("/admin/create-quiz");
     }
 
     // Convert correctIndex to correctAns
     q.correctAns = q.options[q.correctIndex];
-    delete q.correctIndex; // Optionally clean up
+    delete q.correctIndex; // Remove unnecessary field
   }
 
   try {
     const newQuiz = new Quiz({
       title,
       subject,
-      topic,
+      year: parseInt(year),
+      category,
       questions,
     });
 
@@ -64,10 +73,11 @@ quizController.createQuizPost = async (req, res) => {
     return res.redirect("/quiz-section");
   } catch (err) {
     console.error("Error creating quiz:", err);
-    req.flash("error", "Something went wrong.");
+    req.flash("error", "Something went wrong while saving quiz.");
     return res.redirect("/admin/create-quiz");
   }
 };
+
 
   
 

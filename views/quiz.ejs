@@ -34,7 +34,7 @@
     <span><strong>Subject:</strong> <%= quiz.subject %></span>
     <span><strong>Topic:</strong> <%= quiz.topic %></span>
     <% if (admin) { %>
-    <span><strong>Created:</strong> <%= new Date(quiz.createdIt).toLocaleDateString() %></span>
+    <span><strong>Created:</strong> <%= new Date(quiz.createdAt).toLocaleDateString() %></span>
     <% } %>
     <% if (!quiz.isActive) { %>
       <span class="text-red-500 font-semibold">Inactive</span>
