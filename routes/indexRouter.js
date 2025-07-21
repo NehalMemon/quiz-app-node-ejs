@@ -5,6 +5,8 @@ const router = express.Router();
 const  {isUserOrAdmin ,isUserloggedin } = require("../middlewares/isloggedin");
 const  isActive = require("../middlewares/isActive");
 
+
+
 // Controller
 const { quizController} = require("../controllers/quizController");
 
@@ -14,6 +16,7 @@ const { quizController} = require("../controllers/quizController");
 
 router.get("/", (req, res) => {
     res.render("Home", {
+      user : req.session.user,
       error: req.flash("error")[0] || null,
       success: req.flash("success")[0] || null,
     });

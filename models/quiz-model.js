@@ -42,6 +42,20 @@ const quizSchema = mongoose.Schema({
         type : Number
     },
 
+
+    module: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Module",
+        required: true,
+      },
+    
+      // optional: you can also store the year for easier filtering
+      level: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Year",
+      },
+    
+
     category: {
         type: [String],
         enum: ['Midterm', 'Preprof', 'Prof'],

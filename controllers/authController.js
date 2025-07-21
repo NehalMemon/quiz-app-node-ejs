@@ -29,7 +29,7 @@ authController.signupGet = (req, res) => {
 
 authController.signupPost = async (req, res) => {
   try {
-    const { userName, email, password, signupOtp, resendOtp } = req.body;
+    const { userName, email, password, signupOtp, resendOtp, yearOfStudy } = req.body;
     const sessionData = req.session.tempUser;
 
     if (resendOtp) {
@@ -41,7 +41,8 @@ authController.signupPost = async (req, res) => {
       sessionData.signupOtp = newOtp;
       sessionData.signupOtpExpiry = Date.now() + 5 * 60 * 1000;
 
-      await sendOtpEmail(sessionData.email, newOtp, "Your New OTP Code");
+      await sendOtpEmail(sessionData.email,newOtp, "Your New OTP Code", true);
+      
 
       req.flash("success", "New OTP sent to your email.");
       return res.render("User-signup", {
@@ -89,6 +90,8 @@ authController.signupPost = async (req, res) => {
         userName: sessionData.userName,
         email: sessionData.email,
         password: hashedPassword,
+        yearOfStudy: sessionData.yearOfStudy
+
       });
 
       req.session.tempUser = null;
@@ -118,11 +121,14 @@ authController.signupPost = async (req, res) => {
       userName,
       email,
       password,
+      yearOfStudy,
       signupOtp: otp,
       signupOtpExpiry: Date.now() + 5 * 60 * 1000,
     };
 
-    await sendOtpEmail(email, otp, "Your OTP Code");
+    await sendOtpEmail(email,otp, "Your Signup OTP Code", true);
+
+    
 
     req.flash("success", "OTP sent to your email.");
     return res.render("User-signup", {
@@ -130,7 +136,7 @@ authController.signupPost = async (req, res) => {
       success: req.flash("success")[0],
       error: null,
       showOtp: true,
-      old: { userName, email },
+      old: { userName, email, yearOfStudy },
     });
   } catch (err) {
     console.error("Signup Error:", err);
@@ -188,6 +194,7 @@ authController.loginPost = async (req, res) => {
       await user.save();
 
       await sendOtpEmail(user.email, otp, "Your Login OTP Code", true);
+
       req.flash("success", "New OTP sent to your email.");
       return res.render("User-login", {
         layout: false,
@@ -306,14 +313,6 @@ authController.loginPost = async (req, res) => {
 
     await sendOtpEmail(email, otp, "Your Login OTP Code", true);
 
-    req.flash("success", "OTP sent to your email. Check your inbox!");
-    return res.render("User-login", {
-      layout: false,
-      error: null,
-      success: req.flash("success")[0],
-      showOtp: true,
-      email,
-    });
   } catch (err) {
     console.error("Login Error:", err);
     req.flash("error", "An unexpected error occurred.");
@@ -565,12 +564,30 @@ async function sendOtpEmail(to, otp, subject, isHTML = false) {
     },
   });
 
+  const htmlTemplate = `
+    <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;">
+      <h2 style="color: #0056b3;">DoctorQuizz ${subject.includes("Login") ? "Login" : "Signup"} Verification</h2>
+      <p>Hello,</p>
+      <p>We received a request to ${subject.includes("Login") ? "log in to" : "sign up for"} your DoctorQuizz account.</p>
+      <p>Use the OTP below to complete your ${subject.includes("Login") ? "login" : "registration"}:</p>
+
+      <div style="font-size: 24px; font-weight: bold; color: #222; margin: 20px 0;">${otp}</div>
+
+      <p>This OTP is valid for <strong>5 minutes</strong>. Please do not share this code with anyone for your account’s security.</p>
+
+      <p>If you did not attempt to ${subject.includes("Login") ? "log in" : "sign up"}, we recommend changing your password and contacting our support team immediately.</p>
+
+      <br/>
+      <p>Best regards,<br/>The DoctorQuizz Team</p>
+    </div>
+  `;
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
     subject,
     [isHTML ? "html" : "text"]: isHTML
-      ? `<h2>Your OTP</h2><p>${otp}</p>`
+      ? htmlTemplate
       : `Your OTP is: ${otp}`,
   };
 

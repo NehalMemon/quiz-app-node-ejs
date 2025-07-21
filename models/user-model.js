@@ -20,6 +20,12 @@ const UserSchema = new mongoose.Schema({
         lowercase: true
     },
 
+    yearOfStudy : {
+        type : String,
+        required : true,
+        enum : ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year"]
+    },
+
     password: {
         type: String,
         required: true,

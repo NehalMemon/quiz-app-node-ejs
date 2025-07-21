@@ -1,7 +1,8 @@
 const express = require('express');
 const app = express();
 
-
+const year = require("./models/year-model")
+const module_model = require("./models/module-model")
 const userRouter= require("./routes/userRouter");
 const indexRouter= require("./routes/indexRouter");
 const adminRouter= require("./routes/adminRouter");
@@ -22,8 +23,11 @@ app.use(express.static(path.join(__dirname,"public")))
 app.use(expressSession({
     resave:false,
     saveUninitialized:false,
-    secret: process.env.EXPRESS_SESSION_SECRET
-}));
+    secret: process.env.EXPRESS_SESSION_SECRET,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+        httpOnly: true,
+}}));
 app.use(flash())
 
 app.use((req, res, next) => {
@@ -56,6 +60,12 @@ app.use("/user" , userRouter)
 app.use("/admin" , adminRouter)
 
 
+// const creater = async () => {
+// const firstYear = await year.create({name : "5th Year"})
+
+// }
+
+// creater()
 
 app.listen(3000 , '0.0.0.0', ()=>{
     console.log("server is running on port 3000")
