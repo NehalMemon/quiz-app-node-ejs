@@ -71,6 +71,7 @@ quizController.createQuizPost = async (req, res) => {
 
     req.flash("success", "Quiz created successfully.");
     return res.redirect("/quiz-section");
+
   } catch (err) {
     console.error("Error creating quiz:", err);
     req.flash("error", "Something went wrong while saving quiz.");
@@ -80,37 +81,58 @@ quizController.createQuizPost = async (req, res) => {
 
 
   
-
 quizController.viewQuizSectionGet = async (req, res) => {
   try {
-    const { subject, topic } = req.query;
+    const { subject = '' } = req.query;
+
     const filters = {};
+    if (subject.trim()) {
+      filters.subject = { $regex: subject.trim(), $options: 'i' };
+    }
 
-    if (subject) filters.subject = { $regex: subject, $options: "i" };
-    if (topic) filters.topic = { $regex: topic, $options: "i" };
+    // Handle category filters
+    let selectedCategories = req.query.category;
+    if (selectedCategories && !Array.isArray(selectedCategories)) {
+      selectedCategories = [selectedCategories];
+    }
 
-    const allQuizzes = await Quiz.find(filters).sort({ createdAt: -1 });
+    if (selectedCategories && selectedCategories.length > 0) {
+      filters.category = { $in: selectedCategories };
+    }
+
+    // Apply both filters
+    const quizzes = await Quiz.find(filters).sort({ year: -1 });
+
     const isAdmin = req.admin?.isAdmin || false;
-
-
     const visibleQuizzes = isAdmin
-      ? allQuizzes
-      : allQuizzes.filter(q => q.isActive);
+      ? quizzes
+      : quizzes.filter(q => q.isActive);
 
-    res.render("Quiz-section", {
-      quiz: visibleQuizzes,
+    const groupedQuizzes = {};
+    for (const quiz of visibleQuizzes) {
+      const year = quiz.year || 'Unknown';
+      if (!groupedQuizzes[year]) groupedQuizzes[year] = [];
+      groupedQuizzes[year].push(quiz);
+    }
+
+    res.render('Quiz-section', {
+      quizzes,
+      groupedQuizzes,
+      subject: req.query.subject || '',
+      selectedCategories: selectedCategories || [],
       admin: isAdmin,
-      subject: subject || '',
-      topic: topic || '',
-      error: req.flash("error")[0] || null,
-      success: req.flash("success")[0] || null,
+      error: req.flash('error')[0] || null,
+      success: req.flash('success')[0] || null,
     });
   } catch (err) {
-    console.error("Error fetching quizzes:", err);
-    req.flash("error", "Failed to load quizzes");
-    res.redirect("/");
+    console.error('Error fetching quizzes:', err);
+    req.flash('error', 'Failed to load quizzes');
+    res.redirect('/');
   }
 };
+
+
+
 
 
 
@@ -221,6 +243,7 @@ quizController.submitQuizPost = async (req, res) => {
     console.error("Quiz Submission Error:", err);
     req.flash("error", "Something went wrong while submitting.");
     res.redirect("/quiz-section");
+
   }
 };
 
