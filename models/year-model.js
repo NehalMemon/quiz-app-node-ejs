@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 const yearSchema = new mongoose.Schema({
   name: {
-    type: String,
+    type: Number,
     required: true,
     unique: true,
   },

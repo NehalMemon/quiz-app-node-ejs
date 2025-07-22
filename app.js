@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 
 const year = require("./models/year-model")
-const module_model = require("./models/module-model")
+const Module = require("./models/module-model")
 const userRouter= require("./routes/userRouter");
 const indexRouter= require("./routes/indexRouter");
 const adminRouter= require("./routes/adminRouter");
@@ -61,7 +61,9 @@ app.use("/admin" , adminRouter)
 
 
 // const creater = async () => {
-// const firstYear = await year.create({name : "5th Year"})
+// const fifthYear = await year.findOne({name : "5"})
+// const secondYear = await year.findOne({name : "2"})
+//  await Module.findByIdAndUpdate("687f92841acde89076811e1a",{year : secondYear._id})
 
 // }
 

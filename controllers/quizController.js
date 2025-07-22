@@ -2,38 +2,50 @@
 const quizController = {};
 const Quiz = require("../models/quiz-model");
 const User = require("../models/user-model");
+const Year = require("../models/year-model");
+const Module = require("../models/module-model");
 
-quizController.createQuizGet = (req, res) => {
-  res.render("Create-Quiz", {
-    error: req.flash("error")[0] || null,
-    success: req.flash("success")[0] || null,
-    old: req.flash("old")[0] || null
-  });
+
+quizController.createQuizGet = async (req, res) => {
+  try {
+    const years = await Year.find().sort({name : 1});   // levels (e.g., 1st year, 2nd year)
+    const modules = await Module.find();
+
+    res.render("Create-Quiz", {
+      error: req.flash("error")[0] || null,
+      success: req.flash("success")[0] || null,
+      old: req.flash("old")[0] || null,
+      levels: years,     // Pass to EJS
+      modules            // Pass to EJS
+    });
+  } catch (err) {
+    console.error("Error loading quiz form:", err);
+    req.flash("error", "Could not load quiz form.");
+    res.redirect("/admin/dashboard");
+  }
 };
 
-
+// POST: Create Quiz
 quizController.createQuizPost = async (req, res) => {
-  const { title, subject, year } = req.body;
+  const { title, subject, year, level, module } = req.body;
   let category = req.body.category;
 
-  // Ensure category is always an array
   if (!Array.isArray(category)) {
     category = category ? [category] : [];
   }
 
   let questions;
-
   try {
     questions = JSON.parse(req.body.questions);
   } catch (err) {
     req.flash("error", "Invalid question format.");
-    req.flash("old", { title, subject, year, category });
+    req.flash("old", { title, subject, year, level, module, category });
     return res.redirect("/admin/create-quiz");
   }
 
   if (!Array.isArray(questions) || questions.length === 0) {
     req.flash("error", "Please provide at least one question.");
-    req.flash("old", { title, subject, year, category });
+    req.flash("old", { title, subject, year, level, module, category });
     return res.redirect("/admin/create-quiz");
   }
 
@@ -49,20 +61,22 @@ quizController.createQuizPost = async (req, res) => {
       q.correctIndex > 3
     ) {
       req.flash("error", `Invalid data in Question ${i + 1}.`);
-      req.flash("old", { title, subject, year, category });
+      req.flash("old", { title, subject, year, level, module, category });
       return res.redirect("/admin/create-quiz");
     }
 
     // Convert correctIndex to correctAns
     q.correctAns = q.options[q.correctIndex];
-    delete q.correctIndex; // Remove unnecessary field
+    delete q.correctIndex;
   }
-
+    const Level =await Year.findOne({name:level})
   try {
     const newQuiz = new Quiz({
       title,
       subject,
-      year: parseInt(year),
+      year: parseInt(year), // Appeared year
+      level :Level._id,                // ObjectId from Year model
+      module,               // ObjectId from Module model
       category,
       questions,
     });
@@ -79,24 +93,34 @@ quizController.createQuizPost = async (req, res) => {
 };
 
 
+
+
+
   
+
+function groupBy(array, key) {
+  return array.reduce((result, item) => {
+    // Ensure year is treated consistently as a string
+    const groupKey = item[key] ? item[key].toString() : 'Unknown';
+    result[groupKey] = result[groupKey] || [];
+    result[groupKey].push(item);
+    return result;
+  }, {});
+}
 
 quizController.viewQuizSectionGet = async (req, res) => {
   try {
-    const { subject = '', topic = '', category } = req.query;
+    const { subject = '', topic = '', category, module: selectedModule } = req.query;
     const filters = {};
 
-    // Subject filter
-    if (subject.trim()) {
-      filters.subject = { $regex: subject.trim(), $options: "i" };
-    }
+    const userYear = Number(req.user?.year);
+    const isAdmin = req.admin?.isAdmin || false;
 
-    // Topic filter
-    if (topic.trim()) {
-      filters.topic = { $regex: topic.trim(), $options: "i" };
-    }
+    // Apply subject and topic filters
+    if (subject.trim()) filters.subject = { $regex: subject.trim(), $options: "i" };
+    if (topic.trim()) filters.topic = { $regex: topic.trim(), $options: "i" };
 
-    // Category filter: support single or multiple checkboxes
+    // Apply category filter (convert to array if needed)
     let selectedCategories = category;
     if (selectedCategories && !Array.isArray(selectedCategories)) {
       selectedCategories = [selectedCategories];
@@ -106,17 +130,52 @@ quizController.viewQuizSectionGet = async (req, res) => {
       filters.category = { $in: selectedCategories };
     }
 
-    // Get quizzes
-    const allQuizzes = await Quiz.find(filters).sort({ createdAt: -1 });
-    const isAdmin = req.admin?.isAdmin || false;
+    // Apply module filter (only one module selected at a time)
+    if (selectedModule && selectedModule !== "all") {
+      filters.module = selectedModule;
+    }
 
-    // Filter inactive quizzes for non-admins
-    const visibleQuizzes = isAdmin
-      ? allQuizzes
-      : allQuizzes.filter(q => q.isActive);
+    // Fetch all quizzes with filters, sort newest first
+    const allQuizzes = await Quiz.find(filters)
+      .sort({ year: -1, createdAt: -1 })
+      .populate("level module") // make sure level and module are populated
+      .lean();
+
+    // Filter by active if not admin
+    const visibleQuizzes = isAdmin ? allQuizzes : allQuizzes.filter(q => q.isActive);
+
+    // Further restrict to quizzes of user’s study year
+    const eligibleQuizzes = visibleQuizzes.filter(q =>
+      q.level && Number(q.level.name) === userYear
+    );
+
+    // Convert all years to strings for grouping
+    eligibleQuizzes.forEach(quiz => {
+      quiz.year = quiz.year ? quiz.year.toString() : "Unknown";
+    });
+
+    // Group by year
+    const quizzesByYear = groupBy(eligibleQuizzes, "year");
+
+    // Sort year groups in descending order
+    const sortedYears = Object.keys(quizzesByYear).sort((a, b) => {
+      if (a === 'Unknown') return 1;
+      if (b === 'Unknown') return -1;
+      return parseInt(b) - parseInt(a);
+    });
+
+    const sortedQuizzesByYear = {};
+    sortedYears.forEach(year => {
+      sortedQuizzesByYear[year] = quizzesByYear[year];
+    });
+
+    // Get all modules for the user's year only
+    const modulesForYear = await Module.find({ level: req.user.level }).lean();
 
     res.render("Quiz-section", {
-      quiz: visibleQuizzes,
+      quizzesByYear: sortedQuizzesByYear,
+      modulesForYear,
+      selectedModule,
       admin: isAdmin,
       subject,
       topic,
@@ -124,14 +183,13 @@ quizController.viewQuizSectionGet = async (req, res) => {
       error: req.flash("error")[0] || null,
       success: req.flash("success")[0] || null,
     });
+
   } catch (err) {
     console.error("Error fetching quizzes:", err);
     req.flash("error", "Failed to load quizzes");
     res.redirect("/");
   }
 };
-
-
 
 
 quizController.viewQuizGet = async (req,res) => {
@@ -253,8 +311,13 @@ quizController.editQuizGet = async (req, res) => {
       return res.redirect("/admin/dashboard");
     }
 
+    const years = await Year.find({});
+    const modules = await Module.find({level : quiz.level});
+
     res.render("Edit-quiz", {
       quiz,
+      years,
+      modules,
       error: req.flash("error")[0] || null,
       success: req.flash("success")[0] || null
     });
@@ -268,16 +331,23 @@ quizController.editQuizGet = async (req, res) => {
 
 quizController.editQuizPost = async (req, res) => {
   try {
-    const { title, subject, topic, description, questions } = req.body;
+    const {
+      title,
+      subject,
+      topic,
+      description,
+      questions,
+      year,
+      module,
+      categories
+    } = req.body;
 
-    // Make sure quiz exists
     const quiz = await Quiz.findById(req.params.id);
     if (!quiz) {
       req.flash("error", "Quiz not found");
       return res.redirect("/admin/dashboard");
     }
 
-    // Parse questions
     let parsedQuestions;
     try {
       parsedQuestions = JSON.parse(questions);
@@ -287,10 +357,8 @@ quizController.editQuizPost = async (req, res) => {
       return res.redirect(`/admin/quiz/${req.params.id}/edit`);
     }
 
-    // Validate and enrich each question
     for (let i = 0; i < parsedQuestions.length; i++) {
       const q = parsedQuestions[i];
-
       if (
         !q.questionText ||
         !Array.isArray(q.options) ||
@@ -303,16 +371,20 @@ quizController.editQuizPost = async (req, res) => {
         return res.redirect(`/admin/quiz/${req.params.id}/edit`);
       }
 
-      // ✅ Set correctAns for mongoose schema validation
       q.correctAns = q.options[q.correctIndex];
     }
 
-    // Update quiz fields
+    // ✅ Update all fields
     quiz.title = title;
     quiz.subject = subject;
     quiz.topic = topic;
     quiz.description = description;
     quiz.questions = parsedQuestions;
+
+    // ✅ Convert year to number, categories to array
+    if (year) quiz.year = parseInt(year);
+    if (module) quiz.module = module;
+    quiz.categories = Array.isArray(categories) ? categories : [categories];
 
     await quiz.save();
 
@@ -326,23 +398,24 @@ quizController.editQuizPost = async (req, res) => {
 };
 
 
+
 quizController.deleteQuizPost = async (req,res) => {
   try{
     const quiz = await Quiz.findById(req.params.id);
 
     if(!quiz){
       req.flash("error", "Quiz not found");
-      return res.redirect("/admin/quiz-section");
+      return res.redirect("/quiz-section");
   }
 
   await quiz.deleteOne();
   req.flash("success", "Quiz deleted successfully");
-  res.redirect("/admin/quiz-section");
+  res.redirect("/quiz-section");
 }
   catch(err){
     console.error("Unable to delete quiz", err);
     req.flash("error", "Something went wrong");
-    res.redirect("/admin/quiz-section");
+    res.redirect("/quiz-section");
   }
 }
 
@@ -352,7 +425,7 @@ quizController.activationQuizPost = async (req,res) => {
 
     if(!quiz){
       req.flash("error", "Quiz not found");
-      return res.redirect("/admin/quiz-section");
+      return res.redirect("/quiz-section");
   }
 
   

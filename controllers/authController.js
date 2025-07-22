@@ -313,6 +313,15 @@ authController.loginPost = async (req, res) => {
 
     await sendOtpEmail(email, otp, "Your Login OTP Code", true);
 
+
+    return res.render("User-login", {
+      layout: false,
+      success: "OTP sent to your email.",
+      error: null,
+      showOtp: true,
+      email: user.email,
+    });
+
   } catch (err) {
     console.error("Login Error:", err);
     req.flash("error", "An unexpected error occurred.");
@@ -325,12 +334,18 @@ authController.loginPost = async (req, res) => {
 
 authController.logout = async (req, res) => {
   try {
-    const decoded = jwt.verify(req.cookies.userToken, process.env.JWT_KEY);
+    const token = req.cookies.userToken;
+
+    if (!token) {
+      // No token, just redirect safely
+      return res.redirect("/user/login");
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_KEY);
     await usermodel.findOneAndUpdate({ email: decoded.email }, { isLoggedIn: false });
 
     req.flash("success", "Logged out successfully");
 
-    // Destroy the session and only redirect once
     req.session.destroy(err => {
       if (err) {
         console.error("Session destroy error:", err);
@@ -338,17 +353,18 @@ authController.logout = async (req, res) => {
         return res.redirect("/user/login");
       }
 
-      // Only send headers once
       res.clearCookie("userToken");
       return res.redirect("/user/login");
     });
 
   } catch (err) {
     console.error("Logout error:", err);
-    req.flash("error", err.message);
+    req.flash("error", "Session error, logging out...");
+    res.clearCookie("userToken");
     return res.redirect("/user/login");
   }
 };
+
 
 
 // ================= ADMIN CONTROLLER =================
@@ -431,12 +447,18 @@ adminController.loginPost = async (req, res) => {
 
 adminController.logout = async (req, res) => {
   try {
-    const decoded = jwt.verify(req.cookies.adminToken, process.env.JWT_KEY);
+    const token = req.cookies.adminToken;
+
+    if (!token) {
+      // No token? Just redirect safely
+      return res.redirect("/admin/login");
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_KEY);
     await adminModel.findOneAndUpdate({ email: decoded.email }, { isLoggedIn: false });
 
     req.flash("success", "Logged out successfully");
 
-    // ✅ Only redirect inside the callback — remove the one below
     req.session.destroy(err => {
       if (err) {
         console.error("Session destroy error:", err);
@@ -448,13 +470,14 @@ adminController.logout = async (req, res) => {
       return res.redirect("/admin/login");
     });
 
-    // ❌ Remove this — it causes the error
-    // return res.redirect("/admin/login");
   } catch (err) {
-    req.flash("error", err.message);
+    console.error("Admin Logout Error:", err);
+    req.flash("error", "Something went wrong during logout.");
+    res.clearCookie("adminToken"); // Clear invalid token just in case
     return res.redirect("/admin/login");
   }
 };
+
 
 
 

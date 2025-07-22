@@ -21,9 +21,9 @@ const UserSchema = new mongoose.Schema({
     },
 
     yearOfStudy : {
-        type : String,
+        type : Number,
         required : true,
-        enum : ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year"]
+
     },
 
     password: {

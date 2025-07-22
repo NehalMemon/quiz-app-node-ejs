@@ -6,7 +6,7 @@ const moduleSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  year: {
+  level: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Year",
     required: true,

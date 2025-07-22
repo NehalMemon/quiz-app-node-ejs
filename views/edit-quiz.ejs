@@ -1,51 +1,128 @@
-
-  <div class="max-w-4xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-md relative">
-    <!-- Dashboard Button -->
-    <div class="absolute top-4 right-4">
-      <a href="/admin/dashboard" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
-        ← Dashboard
-      </a>
-    </div>
-
-    <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Edit Quiz</h1>
-
-    <% if (error) { %>
-      <p class="text-red-500 text-center mb-4"><%= error %></p>
-    <% } %>
-    <% if (success) { %>
-      <p class="text-green-500 text-center mb-4"><%= success %></p>
-    <% } %>
-
-    <form action="/admin/quiz/<%= quiz._id %>/edit" method="POST" id="quizForm">
-      <div class="grid grid-cols-1 gap-4 mb-6">
-        <input type="text" name="title" placeholder="Quiz Title" value="<%= quiz.title %>" required class="w-full border border-gray-300 rounded px-4 py-2" />
-        <input type="text" name="subject" placeholder="Subject" value="<%= quiz.subject %>" required class="w-full border border-gray-300 rounded px-4 py-2" />
-        <input type="text" name="topic" placeholder="Topic" value="<%= quiz.topic %>" required class="w-full border border-gray-300 rounded px-4 py-2" />
-        <textarea name="description" placeholder="Description (optional)" class="w-full border border-gray-300 rounded px-4 py-2"><%= quiz.description || '' %></textarea>
-      </div>
-
-      <div id="questionsContainer">
-        <!-- JS will populate this with quiz.questions -->
-      </div>
-
-      <div class="text-right mt-4">
-        <button type="button" onclick="addQuestion()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">+ Add Question</button>
-      </div>
-
-      <input type="hidden" name="questions" id="questionsInput" />
-
-      <div class="text-center mt-6">
-        <button type="submit" onclick="prepareQuestions()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-          Update Quiz
-        </button>
-      </div>
-    </form>
+<div class="max-w-4xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-md relative">
+  <!-- Dashboard Button -->
+  <div class="absolute top-4 right-4">
+    <a href="/admin/dashboard" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300">
+      ← Dashboard
+    </a>
   </div>
 
-  <!-- Pass existing questions to JS -->
-  <script id="oldData" type="application/json">
-    <%- JSON.stringify(quiz.questions || []) %>
-  </script>
-  
-  <script src="/scripts/formScript.js"></script>
+  <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Edit Quiz</h1>
 
+  <form action="/admin/quiz/<%= quiz._id %>/edit" method="POST" id="quizForm">
+    <div class="grid grid-cols-1 gap-4 mb-6">
+      <input
+        type="text"
+        name="title"
+        placeholder="Quiz Title"
+        value="<%= quiz.title %>"
+        required
+        class="w-full border border-gray-300 rounded px-4 py-2"
+      />
+      <input
+        type="text"
+        name="subject"
+        placeholder="Subject"
+        value="<%= quiz.subject %>"
+        required
+        class="w-full border border-gray-300 rounded px-4 py-2"
+      />
+      <input
+        type="number"
+        name="year"
+        placeholder="Year (e.g., 2023)"
+        value="<%= quiz.year %>"
+        required
+        class="w-full border border-gray-300 rounded px-4 py-2"
+      />
+
+      <select
+        name="level"
+        id="levelSelect"
+        required
+        class="w-full border border-gray-300 rounded px-4 py-2 mb-4"
+      >
+        <option value="" disabled>Select Student Level</option>
+        <% years.forEach(y => { %>
+          <option value="<%= y.name %>" <%= quiz.level == y.name ? 'selected' : '' %>>
+            <%= y.name === 1 ? "First Year" : y.name === 2 ? "Second Year" : y.name === 3 ? "Third Year" : y.name === 4 ? "Fourth Year": y.name === 5 ? "Fifth Year" : y.name %>
+          </option>
+        <% }) %>
+      </select>
+
+      <select
+        name="module"
+        id="moduleSelect"
+        required
+        class="w-full border border-gray-300 rounded px-4 py-2 mb-6"
+      >
+        <option value="" disabled>Select Module</option>
+        <% modules.forEach(mod => { %>
+          <option value="<%= mod._id %>" <%= quiz.module == mod._id ? 'selected' : '' %>><%= mod.name %></option>
+        <% }) %>
+      </select>
+
+      <div class="mt-4 mb-6">
+        <label class="block font-semibold mb-2">Select Categories</label>
+        <div class="flex gap-4">
+          <label><input type="checkbox" name="category" value="Midterm" <%= quiz.category?.includes('Midterm') ? 'checked' : '' %> /> Midterm</label>
+          <label><input type="checkbox" name="category" value="Preprof" <%= quiz.category?.includes('Preprof') ? 'checked' : '' %> /> Preprof</label>
+          <label><input type="checkbox" name="category" value="Prof" <%= quiz.category?.includes('Prof') ? 'checked' : '' %> /> Prof</label>
+        </div>
+      </div>
+    </div>
+
+    <div id="questionsContainer">
+      <!-- Questions will be dynamically added here -->
+    </div>
+
+    <div class="text-right mt-4">
+      <button type="button" onclick="addQuestion()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+        + Add Question
+      </button>
+    </div>
+
+    <input type="hidden" name="questions" id="questionsInput">
+
+    <div class="text-center mt-6">
+      <button type="submit" onclick="prepareQuestions()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+        Update Quiz
+      </button>
+    </div>
+  </form>
+</div>
+
+<script id="oldData" type="application/json">
+  <%- JSON.stringify(quiz.questions || []) %>
+</script>
+
+<script>
+  // Populate module dropdown based on level
+  document.getElementById("levelSelect").addEventListener("change", async function () {
+    const level = this.value;
+    const moduleSelect = document.getElementById("moduleSelect");
+
+    moduleSelect.innerHTML = `<option value="" disabled selected>Loading modules...</option>`;
+
+    try {
+      const response = await fetch(`/admin/modules-by-level?level=${level}`);
+      const data = await response.json();
+
+      if (data.success) {
+        moduleSelect.innerHTML = `<option value="" disabled selected>Select Module</option>`;
+        data.modules.forEach((module) => {
+          const option = document.createElement("option");
+          option.value = module._id;
+          option.textContent = module.name;
+          moduleSelect.appendChild(option);
+        });
+      } else {
+        moduleSelect.innerHTML = `<option disabled selected>No modules found</option>`;
+      }
+    } catch (err) {
+      console.error("Error loading modules:", err);
+      moduleSelect.innerHTML = `<option disabled selected>Error loading modules</option>`;
+    }
+  });
+</script>
+
+<script src="/scripts/formScript.js"></script>

@@ -1,8 +1,9 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 py-12 bg-gray-50">
-  <!-- Page Title -->
   <h1 class="text-3xl md:text-4xl font-extrabold text-center text-slate-800 mb-12">Browse Quizzes</h1>
 
-  <!-- Filter Form - Modern Card Style -->
+
+
+  <!-- Filter Form -->
   <form method="GET" action="/quiz-section" class="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-6 mb-16 border border-gray-100 transition-all hover:shadow-lg">
     <div class="space-y-6">
       <!-- Subject Input -->
@@ -13,36 +14,30 @@
                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition" />
       </div>
 
-      <!-- Category Select - Modern Toggle Style -->
+      <!-- Category Select -->
       <div>
         <label class="block text-sm font-medium text-slate-700 mb-3">Filter by Category</label>
         <div class="flex flex-wrap gap-2">
-          <label class="inline-flex items-center">
-            <input type="checkbox" name="category" value="Midterm"
-                   <%= selectedCategories?.includes("Midterm") ? "checked" : "" %>
-                   class="hidden peer" />
-            <span class="px-4 py-2 text-sm font-medium rounded-full border peer-checked:bg-yellow-400 peer-checked:border-yellow-500 peer-checked:text-slate-900 border-gray-300 text-slate-700 cursor-pointer transition-all hover:bg-gray-100">
-              Midterm
-            </span>
-          </label>
-          <label class="inline-flex items-center">
-            <input type="checkbox" name="category" value="Preprof"
-                   <%= selectedCategories?.includes("Preprof") ? "checked" : "" %>
-                   class="hidden peer" />
-            <span class="px-4 py-2 text-sm font-medium rounded-full border peer-checked:bg-yellow-400 peer-checked:border-yellow-500 peer-checked:text-slate-900 border-gray-300 text-slate-700 cursor-pointer transition-all hover:bg-gray-100">
-              Preprof
-            </span>
-          </label>
-          <label class="inline-flex items-center">
-            <input type="checkbox" name="category" value="Prof"
-                   <%= selectedCategories?.includes("Prof") ? "checked" : "" %>
-                   class="hidden peer" />
-            <span class="px-4 py-2 text-sm font-medium rounded-full border peer-checked:bg-yellow-400 peer-checked:border-yellow-500 peer-checked:text-slate-900 border-gray-300 text-slate-700 cursor-pointer transition-all hover:bg-gray-100">
-              Prof
-            </span>
-          </label>
+          <% const categories = ['Midterm', 'Preprof', 'Prof']; %>
+          <% categories.forEach(cat => { %>
+            <label class="inline-flex items-center">
+              <input type="checkbox" name="category" value="<%= cat %>"
+                     <%= selectedCategories?.includes(cat) ? "checked" : "" %>
+                     class="hidden peer" />
+              <span class="px-4 py-2 text-sm font-medium rounded-full border peer-checked:bg-yellow-400 peer-checked:border-yellow-500 peer-checked:text-slate-900 border-gray-300 text-slate-700 cursor-pointer transition-all hover:bg-gray-100">
+                <%= cat %>
+              </span>
+            </label>
+          <% }); %>
         </div>
       </div>
+      <select name="module">
+        <option value="all">All Modules</option>
+        <% modulesForYear.forEach(m => { %>
+          <option value="<%= m._id %>" <%= selectedModule == m._id ? 'selected' : '' %>>
+            <%= m.name %>
+          </option>
+        <% }) %>
 
       <!-- Buttons -->
       <div class="flex flex-col sm:flex-row gap-3 pt-4">
@@ -58,14 +53,8 @@
     </div>
   </form>
 
-  <!-- Group Quizzes by Year -->
-  <% const grouped = {}; %>
-  <% quiz.forEach(q => {
-       grouped[q.year] = grouped[q.year] || [];
-       grouped[q.year].push(q);
-  }); %>
-
-  <% if (Object.keys(grouped).length === 0) { %>
+  <!-- Group and Display Quizzes by Year -->
+  <% if (!quizzesByYear || Object.keys(quizzesByYear).length === 0) { %>
     <div class="max-w-md mx-auto text-center py-16">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -74,51 +63,54 @@
       <p class="text-gray-500">Try adjusting your filters or check back later</p>
     </div>
   <% } else { %>
-    <% Object.keys(grouped).sort((a, b) => b - a).forEach(year => { %>
-      <!-- Year Header -->
-      <div class="max-w-7xl mx-auto mb-8">
-        <h2 class="text-2xl font-bold text-slate-800 inline-block relative pl-4">
-          <span class="relative z-10"><%= year %></span>
-          <span class="absolute left-0 bottom-1 w-1 h-6 bg-yellow-400 rounded-full"></span>
-        </h2>
-      </div>
-      
-      <!-- Quizzes Grid - Sleek Table-like Layout -->
-      <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-16 border border-gray-100">
-        <div class="grid grid-cols-12 gap-4 p-4 bg-slate-50 border-b border-gray-200">
-          <div class="col-span-6 sm:col-span-5 text-xs font-medium text-slate-500 uppercase tracking-wider">Title</div>
-          <div class="col-span-3 sm:col-span-2 text-xs font-medium text-slate-500 uppercase tracking-wider">Subject</div>
-          <div class="hidden sm:col-span-3 sm:block text-xs font-medium text-slate-500 uppercase tracking-wider">Categories</div>
-          <div class="col-span-3 sm:col-span-2 text-right text-xs font-medium text-slate-500 uppercase tracking-wider"></div>
-        </div>
-        
-        <% grouped[year].forEach(q => { %>
-          <div class="grid grid-cols-12 gap-4 p-4 items-center border-b border-gray-100 last:border-0 hover:bg-slate-50 transition">
-            <div class="col-span-6 sm:col-span-5">
-              <h3 class="text-sm font-medium text-slate-800 line-clamp-1"><%= q.title %></h3>
-            </div>
-            <div class="col-span-3 sm:col-span-2">
-              <p class="text-sm text-slate-600"><%= q.subject %></p>
-            </div>
-            <div class="hidden sm:col-span-3 sm:block">
-              <div class="flex flex-wrap gap-1">
-                <% q.category.forEach(cat => { %>
-                  <span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800"><%= cat %></span>
-                <% }) %>
-              </div>
-            </div>
-            <div class="col-span-3 sm:col-span-2 text-right">
-              <a href="/quiz/<%= q._id %>" 
-                 class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition focus:outline-none focus:ring-2 focus:ring-yellow-400">
-                Open
-                <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </a>
-            </div>
-          </div>
-        <% }) %>
-      </div>
-    <% }); %>
-  <% } %>
+    <% Object.keys(quizzesByYear)
+    .sort((a, b) => parseInt(b) - parseInt(a)) // Sort years numerically, newest first
+    .forEach(year => { %>
+    
+   <div class="max-w-7xl mx-auto mb-8">
+     <h2 class="text-2xl font-bold text-slate-800 inline-block relative pl-4">
+       <span class="relative z-10"><%= year %></span>
+       <span class="absolute left-0 bottom-1 w-1 h-6 bg-yellow-400 rounded-full"></span>
+     </h2>
+   </div>
+ 
+   <!-- Quiz List for this year -->
+   <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-16 border border-gray-100">
+     <!-- Header row -->
+     <div class="grid grid-cols-12 gap-4 p-4 bg-slate-50 border-b border-gray-200">
+       <div class="col-span-6 sm:col-span-5 text-xs font-medium text-slate-500 uppercase tracking-wider">Title</div>
+       <div class="col-span-3 sm:col-span-2 text-xs font-medium text-slate-500 uppercase tracking-wider">Subject</div>
+       <div class="hidden sm:col-span-3 sm:block text-xs font-medium text-slate-500 uppercase tracking-wider">Categories</div>
+       <div class="col-span-3 sm:col-span-2 text-right text-xs font-medium text-slate-500 uppercase tracking-wider"></div>
+     </div>
+ 
+     <!-- Quiz rows -->
+     <% quizzesByYear[year].forEach(q => { %>
+       <div class="grid grid-cols-12 gap-4 p-4 items-center border-b border-gray-100 last:border-0 hover:bg-slate-50 transition">
+         <div class="col-span-6 sm:col-span-5">
+           <h3 class="text-sm font-medium text-slate-800 line-clamp-1"><%= q.title %></h3>
+         </div>
+         <div class="col-span-3 sm:col-span-2">
+           <p class="text-sm text-slate-600"><%= q.subject %></p>
+         </div>
+         <div class="hidden sm:col-span-3 sm:block">
+           <div class="flex flex-wrap gap-1">
+             <% q.category.forEach(cat => { %>
+               <span class="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800"><%= cat %></span>
+             <% }) %>
+           </div>
+         </div>
+         <div class="col-span-3 sm:col-span-2 text-right">
+           <a href="/quiz/<%= q._id %>" 
+              class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition focus:outline-none focus:ring-2 focus:ring-yellow-400">
+             Open
+             <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+             </svg>
+           </a>
+         </div>
+       </div>
+     <% }) %>
+   </div>
+ <% })} %>
 </div>

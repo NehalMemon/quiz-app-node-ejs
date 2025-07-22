@@ -35,8 +35,31 @@
       required
       class="w-full border border-gray-300 rounded px-4 py-2"
     />
+    <div class="grid grid-cols-1 gap-4 mb-6">
+      <select
+      name="level"
+      id="levelSelect"
+      required
+      class="w-full border border-gray-300 rounded px-4 py-2 mb-4"
+    >
+      <option value="" disabled selected>Select Student Level</option>
+      <% levels.forEach(y => { %>
+        <option value="<%= y.name %>" <%= old?.level == y.name ? 'selected' : '' %>>
+          <%= y.name === 1 ? "First Year" : y.name === 2 ? "Second Year" : y.name === 3 ? "Third Year" : y.name === 4 ? "Fourth Year": y.name === 5 ? "Fifth Year" : y.name %>
+        </option>
+      <% }) %>
+    </select>
     
-    <div class="mt-4">
+    <select
+      name="module"
+      id="moduleSelect"
+      required
+      class="w-full border border-gray-300 rounded px-4 py-2 mb-6"
+    >
+      <option value="" disabled selected>Select Module</option>
+    </select>
+    
+    <div class="mt-4 mb-6">
       <label class="block font-semibold mb-2">Select Categories</label>
       <div class="flex gap-4">
         <label><input type="checkbox" name="category" value="Midterm" <% if (old?.category?.includes('Midterm')) { %> checked <% } %> /> Midterm</label>
@@ -44,6 +67,7 @@
         <label><input type="checkbox" name="category" value="Prof" <% if (old?.category?.includes('Prof')) { %> checked <% } %> /> Prof</label>
       </div>
     </div>
+    
     
     </div>
 
@@ -64,6 +88,38 @@
     </div>
   </form>
 </div>
+
+<script>
+  document.getElementById("levelSelect").addEventListener("change", async function () {
+    const level = this.value;
+    const moduleSelect = document.getElementById("moduleSelect");
+
+    // Clear previous options
+    moduleSelect.innerHTML = `<option value="" disabled selected>Loading modules...</option>`;
+
+    try {
+      const response = await fetch(`/admin/modules-by-level?level=${level}`);
+      const data = await response.json();
+
+      if (data.success) {
+        moduleSelect.innerHTML = `<option value="" disabled selected>Select Module</option>`;
+        data.modules.forEach((module) => {
+          const option = document.createElement("option");
+          option.value = module._id;
+          option.textContent = module.name;
+          moduleSelect.appendChild(option);
+        });
+      } else {
+        moduleSelect.innerHTML = `<option disabled selected>No modules found</option>`;
+      }
+    } catch (err) {
+      console.error("Error loading modules:", err);
+      moduleSelect.innerHTML = `<option disabled selected>Error loading modules</option>`;
+    }
+  });
+</script>
+
+
 
 <script id="oldData" type="application/json">
   <%- JSON.stringify(old && old.questions ? old.questions : []) %>

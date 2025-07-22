@@ -1,5 +1,9 @@
 const express = require("express");
 const router = express.Router();
+const Module = require('../models/module-model');
+const Year = require("../models/year-model");
+
+
 
 // Middleware and Validators
 const validate = require("../middlewares/formsValidator");
@@ -65,6 +69,30 @@ router.get("/user/:id",isAdminloggedin, userController.controlUsersGet );
 
 
 router.post("/activation-user/:id",isAdminloggedin, userController.activationUsersPost );
+
+
+// GET: /admin/modules-by-level
+router.get("/modules-by-level", async (req, res) => {
+  const levelName = Number(req.query.level);
+  if (isNaN(levelName)) {
+    return res.json({ success: false, message: "Invalid level number" });
+  }
+  
+
+  try {
+    const year = await Year.findOne({ name: levelName }); // find Year with name = 1, 2, etc.
+    if (!year) return res.json({ success: false, message: "Year not found" });
+
+    const modules = await Module.find({ level: year._id }); // filter by ObjectId
+    res.json({ success: true, modules });
+
+
+
+  } catch (err) {
+    console.error("Error loading modules by level:", err);
+    res.json({ success: false, message: "Server error" });
+  }
+});
 
 
 
