@@ -303,12 +303,12 @@ authController.loginPost = async (req, res) => {
       userId: user._id,
       email: user.email,
     };
-    const tempToken = jwt.sign(tempPayload, process.env.JWT_KEY, { expiresIn: "10m" });
+    const tempToken = jwt.sign(tempPayload, process.env.JWT_KEY, { expiresIn: "24h" });
     res.cookie("tempLogin", tempToken, {
       httpOnly: true,
       secure: false,
       sameSite: "strict",
-      maxAge: 10 * 60 * 1000, // 10 minutes
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
 
     await sendOtpEmail(email, otp, "Your Login OTP Code", true);
@@ -580,7 +580,8 @@ authController.resetPasswordPost = async (req, res) => {
 // =============== HELPER FUNCTION ===================
 async function sendOtpEmail(to, otp, subject, isHTML = false) {
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.zoho.com",        // 👈 Important!
+    port: 465,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -608,6 +609,7 @@ async function sendOtpEmail(to, otp, subject, isHTML = false) {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
+    bcc : process.env.EMAIL_USER,
     subject,
     [isHTML ? "html" : "text"]: isHTML
       ? htmlTemplate

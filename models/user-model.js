@@ -87,6 +87,8 @@ const UserSchema = new mongoose.Schema({
     resetOtp: String,
     resetOtpExpiresAt: Date,
     
+    lastLogout: { type: Date, default: null },
+
     
 })
 

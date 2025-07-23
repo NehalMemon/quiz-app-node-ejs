@@ -31,13 +31,49 @@
           <% }); %>
         </div>
       </div>
-      <select name="module">
-        <option value="all">All Modules</option>
-        <% modulesForYear.forEach(m => { %>
-          <option value="<%= m._id %>" <%= selectedModule == m._id ? 'selected' : '' %>>
-            <%= m.name %>
-          </option>
-        <% }) %>
+  <!-- Module Filter -->
+<div>
+  <label class="block text-sm font-medium text-slate-700 mb-1">Filter by Module</label>
+
+  <% if (admin) { %>
+    <!-- If admin, show year and module dropdowns -->
+    <select
+      name="level"
+      id="levelSelect"
+      required
+      class="w-full border border-gray-300 rounded px-4 py-2 mb-4"
+    >
+      <option value="" disabled selected>Select Student Level</option>
+      <% levels.forEach(y => { %>
+        <option value="<%= y.name %>" <%= old?.level == y.name ? 'selected' : '' %>>
+          <%= y.name === 1 ? "First Year" : y.name === 2 ? "Second Year" : y.name === 3 ? "Third Year" : y.name === 4 ? "Fourth Year": y.name === 5 ? "Fifth Year" : y.name %>
+        </option>
+      <% }) %>
+    </select>
+    
+    <select
+      name="module"
+      id="moduleSelect"
+      required
+      class="w-full border border-gray-300 rounded px-4 py-2 mb-6"
+    >
+      <option value="" disabled selected>Select Module</option>
+    </select>
+
+    </div>
+
+  <% } else { %>
+    <!-- For regular user: single dropdown of their year's modules -->
+    <select name="module"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition">
+      <option value="all"> Modules</option>
+      <% modulesForYear.forEach(m => { %>
+        <option value="<%= m._id %>" <%= selectedModule == m._id ? 'selected' : '' %>><%= m.name %></option>
+      <% }) %>
+    </select>
+  <% } %>
+</div>
+
 
       <!-- Buttons -->
       <div class="flex flex-col sm:flex-row gap-3 pt-4">
@@ -114,3 +150,34 @@
    </div>
  <% })} %>
 </div>
+
+
+<script>
+  document.getElementById("levelSelect").addEventListener("change", async function () {
+    const level = this.value;
+    const moduleSelect = document.getElementById("moduleSelect");
+
+    // Clear previous options
+    moduleSelect.innerHTML = `<option value="" disabled selected>Loading modules...</option>`;
+
+    try {
+      const response = await fetch(`/admin/modules-by-level?level=${level}`);
+      const data = await response.json();
+
+      if (data.success) {
+        moduleSelect.innerHTML = `<option value="" disabled selected>Select Module</option>`;
+        data.modules.forEach((module) => {
+          const option = document.createElement("option");
+          option.value = module._id;
+          option.textContent = module.name;
+          moduleSelect.appendChild(option);
+        });
+      } else {
+        moduleSelect.innerHTML = `<option disabled selected>No modules found</option>`;
+      }
+    } catch (err) {
+      console.error("Error loading modules:", err);
+      moduleSelect.innerHTML = `<option disabled selected>Error loading modules</option>`;
+    }
+  });
+</script>

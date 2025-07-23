@@ -41,26 +41,22 @@
         required
         class="w-full border border-gray-300 rounded px-4 py-2 mb-4"
       >
-        <option value="" disabled>Select Student Level</option>
-        <% years.forEach(y => { %>
-          <option value="<%= y.name %>" <%= quiz.level == y.name ? 'selected' : '' %>>
-            <%= y.name === 1 ? "First Year" : y.name === 2 ? "Second Year" : y.name === 3 ? "Third Year" : y.name === 4 ? "Fourth Year": y.name === 5 ? "Fifth Year" : y.name %>
-          </option>
-        <% }) %>
-      </select>
-
-      <select
-        name="module"
-        id="moduleSelect"
-        required
-        class="w-full border border-gray-300 rounded px-4 py-2 mb-6"
-      >
-        <option value="" disabled>Select Module</option>
-        <% modules.forEach(mod => { %>
-          <option value="<%= mod._id %>" <%= quiz.module == mod._id ? 'selected' : '' %>><%= mod.name %></option>
-        <% }) %>
-      </select>
-
+      <option value="" disabled selected>Select Student Level</option>
+      <% levels.forEach(y => { %>
+        <option value="<%= y.name %>" <%= old?.level == y.name ? 'selected' : '' %>>
+          <%= y.name === 1 ? "First Year" : y.name === 2 ? "Second Year" : y.name === 3 ? "Third Year" : y.name === 4 ? "Fourth Year": y.name === 5 ? "Fifth Year" : y.name %>
+        </option>
+      <% }) %>
+    </select>
+    
+    <select
+      name="module"
+      id="moduleSelect"
+      required
+      class="w-full border border-gray-300 rounded px-4 py-2 mb-6"
+    >
+      <option value="" disabled selected>Select Module</option>
+    </select>
       <div class="mt-4 mb-6">
         <label class="block font-semibold mb-2">Select Categories</label>
         <div class="flex gap-4">
@@ -96,11 +92,11 @@
 </script>
 
 <script>
-  // Populate module dropdown based on level
   document.getElementById("levelSelect").addEventListener("change", async function () {
     const level = this.value;
     const moduleSelect = document.getElementById("moduleSelect");
 
+    // Clear previous options
     moduleSelect.innerHTML = `<option value="" disabled selected>Loading modules...</option>`;
 
     try {
@@ -124,5 +120,6 @@
     }
   });
 </script>
+
 
 <script src="/scripts/formScript.js"></script>
