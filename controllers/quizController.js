@@ -303,7 +303,7 @@ quizController.submitQuizPost = async (req, res) => {
 
     req.session.lastResults = results;
 
-    res.render("Quiz-result", {
+    res.render("quiz-result", {
       success : req.flash("success")[0] || null,
       error : req.flash("error")[0] || null,
       quiz,
