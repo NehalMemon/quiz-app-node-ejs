@@ -4,6 +4,7 @@ const router = express.Router();
 // Middleware and Validators
 const  {isUserOrAdmin ,isUserloggedin } = require("../middlewares/isloggedin");
 const  isActive = require("../middlewares/isActive");
+const  isSubscribed = require("../middlewares/issubscribe");
 
 
 

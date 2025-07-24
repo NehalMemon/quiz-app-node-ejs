@@ -29,9 +29,10 @@ authController.signupGet = (req, res) => {
 
 authController.signupPost = async (req, res) => {
   try {
-    const { userName, email, password, signupOtp, resendOtp, yearOfStudy } = req.body;
+    const { userName, email, password, signupOtp, resendOtp, yearOfStudy, phoneNumber } = req.body;
     const sessionData = req.session.tempUser;
 
+    // Handle OTP resend
     if (resendOtp) {
       if (!sessionData) {
         req.flash("error", "Session expired.");
@@ -41,8 +42,7 @@ authController.signupPost = async (req, res) => {
       sessionData.signupOtp = newOtp;
       sessionData.signupOtpExpiry = Date.now() + 5 * 60 * 1000;
 
-      await sendOtpEmail(sessionData.email,newOtp, "Your New OTP Code", true);
-      
+      await sendOtpEmail(sessionData.email, newOtp, "Your New OTP Code", true);
 
       req.flash("success", "New OTP sent to your email.");
       return res.render("User-signup", {
@@ -52,9 +52,9 @@ authController.signupPost = async (req, res) => {
         showOtp: true,
         old: sessionData || {}
       });
-      
     }
 
+    // Fix common email typos
     if (email && email.includes("@")) {
       const [localPart, domain] = email.split("@");
       const typoFix = {
@@ -69,6 +69,7 @@ authController.signupPost = async (req, res) => {
       }
     }
 
+    // OTP verification step
     if (signupOtp) {
       if (
         !sessionData ||
@@ -90,45 +91,44 @@ authController.signupPost = async (req, res) => {
         userName: sessionData.userName,
         email: sessionData.email,
         password: hashedPassword,
-        yearOfStudy: sessionData.yearOfStudy
-
+        yearOfStudy: sessionData.yearOfStudy,
+        phoneNumber: sessionData.phoneNumber,
       });
 
       req.session.tempUser = null;
       const token = UsertokenGenerator(newUser);
       res.cookie("userToken", token, { httpOnly: true });
 
-
       req.session.user = {
         _id: newUser._id,
-        name: newUser.name,
-        isAdmin: newUser.isAdmin  // <-- this must exist if admin
+        name: newUser.userName,
+        isAdmin: newUser.isAdmin,
       };
-      
 
       req.flash("success", "User created successfully");
       return res.redirect("/");
     }
 
+    // Check for existing user
     const existingUser = await usermodel.findOne({ email });
     if (existingUser) {
       req.flash("error", "Email already registered.");
       return res.redirect("/user/signup");
     }
 
+    // First-time OTP generation
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     req.session.tempUser = {
       userName,
       email,
       password,
       yearOfStudy,
+      phoneNumber,
       signupOtp: otp,
       signupOtpExpiry: Date.now() + 5 * 60 * 1000,
     };
 
-    await sendOtpEmail(email,otp, "Your Signup OTP Code", true);
-
-    
+    await sendOtpEmail(email, otp, "Your Signup OTP Code", true);
 
     req.flash("success", "OTP sent to your email.");
     return res.render("User-signup", {
@@ -136,7 +136,7 @@ authController.signupPost = async (req, res) => {
       success: req.flash("success")[0],
       error: null,
       showOtp: true,
-      old: { userName, email, yearOfStudy },
+      old: { userName, email, yearOfStudy, phoneNumber },
     });
   } catch (err) {
     console.error("Signup Error:", err);
@@ -144,6 +144,7 @@ authController.signupPost = async (req, res) => {
     return res.redirect("/user/signup");
   }
 };
+
 
 // ================= USER LOGIN =================
 
@@ -580,8 +581,8 @@ authController.resetPasswordPost = async (req, res) => {
 // =============== HELPER FUNCTION ===================
 async function sendOtpEmail(to, otp, subject, isHTML = false) {
   const transporter = nodemailer.createTransport({
-    host: "smtp.zoho.com",        // 👈 Important!
-    port: 465,
+    service: "gmail",        // 👈 Important!
+    // port: 465,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,

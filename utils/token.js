@@ -5,7 +5,7 @@ const UsertokenGenerator = (user) => {
         email:user.email , id: user._id
     },
     process.env.JWT_KEY,
-    {expiresIn:"1h"}
+    {expiresIn:"24h"}
 )}
 
 const AdmintokenGenerator = (admin) => {
@@ -13,7 +13,7 @@ const AdmintokenGenerator = (admin) => {
         email:admin.email , id: admin._id
     },
     process.env.JWT_KEY,
-    {expiresIn:"1h"}
+    {expiresIn:"24h"}
 )}
 
 module.exports = {UsertokenGenerator , AdmintokenGenerator}

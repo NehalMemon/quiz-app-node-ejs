@@ -6,6 +6,7 @@ const app = express();
 const userRouter= require("./routes/userRouter");
 const indexRouter= require("./routes/indexRouter");
 const adminRouter= require("./routes/adminRouter");
+const paymentRouter= require("./routes/paymentRouter");
 const path = require('path');
 const coookieParser=require("cookie-parser")
 const session = require("express-session");
@@ -65,6 +66,7 @@ app.set('layout', 'layouts/main');
 app.use("/" , indexRouter)
 app.use("/user" , userRouter)
 app.use("/admin" , adminRouter)
+// app.use("/api/payment" , paymentRouter)
 
 
 // const creater = async () => {

@@ -19,10 +19,16 @@ const UserSchema = new mongoose.Schema({
         trim: true,
         lowercase: true
     },
+    
+    phoneNumber : {
+        type : String,
+        required : true
+    },
 
     yearOfStudy : {
         type : Number,
         required : true,
+        match: /^03[0-9]{9}$/
 
     },
 
@@ -89,6 +95,20 @@ const UserSchema = new mongoose.Schema({
     
     lastLogout: { type: Date, default: null },
 
+    isSubscribed: {
+        type: Boolean,
+        default: false
+      },
+      subscriptionStart: {
+        type: Date
+      },
+      subscriptionEnd: {
+        type: Date
+      },
+      paymentReference: {
+        type: String // store PayPro invoice ref or transaction ID
+      }
+      
     
 })
 

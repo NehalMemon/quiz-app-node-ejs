@@ -1,0 +1,8 @@
+<!-- views/payment-success.ejs -->
+<div class="success-page">
+    <h1>🎉 Payment Successful!</h1>
+    <p>Thank you for subscribing, <%= user.name %>.</p>
+    <p>Your subscription is now active and will expire on <strong><%= user.subscriptionEnd.toDateString() %></strong>.</p>
+    <a href="/quiz/section" class="btn">Start Solving Quizzes</a>
+  </div>
+  
