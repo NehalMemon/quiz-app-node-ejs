@@ -16,7 +16,7 @@ const { quizController} = require("../controllers/quizController");
 
 
 router.get("/", (req, res) => {
-    res.render("Home", {
+    res.render("home", {
       user : req.session.user,
       error: req.flash("error")[0] || null,
       success: req.flash("success")[0] || null,
