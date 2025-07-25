@@ -26,6 +26,45 @@ router.get("/", (req, res) => {
 
 router.get("/quiz-section", isUserOrAdmin,quizController.viewQuizSectionGet);
 
+router.get("/features",(req,res)=>{
+  res.render("features",{
+    success:null,
+    error:null,
+  })
+});
+router.get("/pricing",(req,res)=>{
+  res.render("pricing",{
+    success:null,
+    error:null,
+  })
+});
+router.get("/terms",(req,res)=>{
+  res.render("terms",{
+    success:null,
+    error:null,
+  })
+});
+router.get("/PrivacyPolicy",(req,res)=>{
+  res.render("privacy",{
+    success:null,
+    error:null,
+  })
+});
+
+router.get("/contact",(req,res)=>{
+  res.render("HelpandCOntact",{
+    success:null,
+    error:null,
+    EMAIL_USER:process.env.EMAIL_USER
+  })
+});
+router.get("/faq",(req,res)=>{
+  res.render("faq",{
+    success:null,
+    error:null,
+  })
+});
+
 
 router.get("/quiz/:id", isUserOrAdmin, isActive, quizController.viewQuizGet);
 

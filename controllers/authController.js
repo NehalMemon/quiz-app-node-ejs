@@ -597,21 +597,21 @@ async function sendOtpEmail(to, otp, subject, isHTML = false) {
   });
 
   const htmlTemplate = `
-    <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;">
+<div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;">
       <h2 style="color: #0056b3;">DoctorQuizz ${subject.includes("Login") ? "Login" : "Signup"} Verification</h2>
-      <p>Hello,</p>
-      <p>We received a request to ${subject.includes("Login") ? "log in to" : "sign up for"} your DoctorQuizz account.</p>
-      <p>Use the OTP below to complete your ${subject.includes("Login") ? "login" : "registration"}:</p>
+      <p>Hey Medico</p>
+      <pThank you for ${subject.includes("Login") ? "login in to " : "signing up to"} We welcome you on board </p>
+      <p>Here's your OTP to complete ${subject.includes("Login") ? "login" : "registration"}:</p>
 
       <div style="font-size: 24px; font-weight: bold; color: #222; margin: 20px 0;">${otp}</div>
 
-      <p>This OTP is valid for <strong>5 minutes</strong>. Please do not share this code with anyone for your account’s security.</p>
+      <p>This OTP is valid for <strong>5 minutes</strong>. Please do not share this code with anyone.</p>
 
-      <p>If you did not attempt to ${subject.includes("Login") ? "log in" : "sign up"}, we recommend changing your password and contacting our support team immediately.</p>
+      <p>If you did not ask for OTP ${subject.includes("Login") ? "login" : "registration"}, we recommend changing your password immediately and inform at our Whatsapp chat support </p>
 
       <br/>
-      <p>Best regards,<br/>The DoctorQuizz Team</p>
-    </div>
+      <p>Best regards,<br/>Admin DoctorQuizz</p>
+    </div>
   `;
 
   const mailOptions = {

@@ -4,54 +4,58 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title || 'Past Papers Platform' %></title>
+  <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="/stylesheet/output.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 min-h-screen flex flex-col">
 
-  <nav class="bg-gradient-to-r from-slate-900 to-slate-700 text-white shadow-lg relative z-50">
+  <nav class="bg-transparent backdrop-blur-md z-50 relative border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
+      <div class="flex justify-between items-center h-20">
         
-        <!-- Logo -->
-        <div class="flex-shrink-0">
-          <span class="text-lg md:text-xl font-bold">Doctor's Quizz</span>
-        </div>
+     
+    <!-- Logo -->
+    <div class="flex-shrink-0 w-[220px] h-16 flex items-center">
+      <a href="/" class="flex items-center h-full">
+        <img src="/images/logo.svg"
+             alt="Doctor's Quizz"
+             class="h-12 w-auto max-w-[200px]"
+             style="min-width: 180px;"
+             onerror="this.style.display='none'" />
+      </a>
+    </div>
+
   
         <!-- Desktop Nav -->
-        <div class="hidden md:flex space-x-6 items-center">
-          <a href="/" class="<%= currentRoute === '/' ? 'text-yellow-400 font-semibold' : 'hover:text-yellow-300' %>">Home</a>
-          <a href="/quiz-section" class="<%= currentRoute === '/quiz-section' ? 'text-yellow-400 font-semibold' : 'hover:text-yellow-300' %>">Quiz Section</a>
+        <div class="hidden md:flex space-x-5 items-center font-semibold text-sm">
+          <a href="/" class="px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Home</a>
+          <a href="/quiz-section" class="px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Quiz Section</a>
   
           <% if (admin) { %>
-            <a href="/admin/dashboard" class="<%= currentRoute === '/admin/dashboard' ? 'text-yellow-400 font-semibold' : 'hover:text-yellow-300' %>">Dashboard</a>
+            <a href="/admin/dashboard" class="px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Dashboard</a>
             <form action="/admin/logout" method="POST" class="inline">
-              <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Logout</button>
+              <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-semibold">Logout</button>
             </form>
           <% } else if (user) { %>
-            <a href="/user/profile" class="hover:text-yellow-300 text-green-300 font-semibold">Profile</a>
+            <a href="/user/profile" class="px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Profile</a>
             <form action="/user/logout" method="POST" class="inline">
-              <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Logout</button>
-            </form>
-            <form action="/user/delete-user/<%= user._id %>" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to sign out?')">
-              <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Sign out</button>
+              <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-semibold">Logout</button>
             </form>
           <% } else { %>
-            <a href="/features" class="hover:text-yellow-300">Features</a>
-            <a href="/pricing" class="hover:text-yellow-300">Pricing</a>
-            <a href="/user/login" class="hover:text-yellow-300">Login</a>
-            <a href="/user/signup" class="bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded font-semibold">Get Started</a>
+            <a href="/features" class="px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Features</a>
+            <a href="/pricing" class="px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Pricing</a>
+            <a href="/user/login" class="px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Login</a>
+            <a href="/user/signup" class="bg-yellow-400 hover:bg-yellow-500 text-black px-4 py-2 rounded-full font-semibold">Get Started</a>
           <% } %>
         </div>
   
         <!-- Mobile Menu Button -->
         <div class="md:hidden">
-          <button id="mobileMenuButton" class="text-white focus:outline-none">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M4 6h16M4 12h16M4 18h16" />
+          <button id="mobileMenuButton" class="text-black focus:outline-none">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         </div>
@@ -59,40 +63,41 @@
     </div>
   
     <!-- Mobile Menu -->
-    <div id="mobileMenu" class="hidden md:hidden bg-white text-gray-800 absolute top-16 inset-x-0 p-6 rounded-b-lg shadow-lg z-50">
-      <ul class="space-y-4 text-center font-medium">
-        <li><a href="/" class="block <%= currentRoute === '/' ? 'text-yellow-500 font-semibold' : 'hover:text-blue-600' %>">Home</a></li>
-        <li><a href="/quiz-section" class="block <%= currentRoute === '/quiz-section' ? 'text-yellow-500 font-semibold' : 'hover:text-blue-600' %>">Quiz Section</a></li>
+    <div id="mobileMenu" class="hidden md:hidden bg-white bg-opacity-95 absolute top-20 inset-x-0 p-5 rounded-b-lg shadow-lg">
+      <ul class="space-y-3 font-semibold text-center text-sm">
+        <li><a href="/" class="block px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Home</a></li>
+        <li><a href="/quiz-section" class="block px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Quiz Section</a></li>
   
         <% if (admin) { %>
-          <li><a href="/admin/dashboard" class="block hover:text-blue-600">Dashboard</a></li>
+          <li><a href="/admin/dashboard" class="block px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Dashboard</a></li>
           <li>
             <form action="/admin/logout" method="POST">
-              <button class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600">Logout</button>
+              <button class="w-full text-left bg-red-500 text-white py-2 px-4 rounded-full hover:bg-red-600 font-semibold">Logout</button>
             </form>
           </li>
         <% } else if (user) { %>
-          <li><a href="/user/profile" class="block text-green-600 font-semibold hover:underline">Profile</a></li>
+          <li><a href="/user/profile" class="block px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Profile</a></li>
           <li>
             <form action="/user/logout" method="POST">
-              <button class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600">Logout</button>
-            </form>
-          </li>
-          <li>
-            <form action="/user/delete-user/<%= user._id %>" method="POST" onsubmit="return confirm('Are you sure you want to sign out?')">
-              <button class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600">Sign out</button>
+              <button class="w-full text-left bg-red-500 text-white py-2 px-4 rounded-full hover:bg-red-600 font-semibold">Logout</button>
             </form>
           </li>
         <% } else { %>
-          <li><a href="/features" class="block hover:text-blue-600">Features</a></li>
-          <li><a href="/pricing" class="block hover:text-blue-600">Pricing</a></li>
-          <li><a href="/user/login" class="block text-blue-600 hover:underline">Login</a></li>
-          <li><a href="/user/signup" class="block bg-yellow-400 text-black font-semibold px-4 py-2 rounded hover:bg-yellow-500">Get Started</a></li>
+          <li><a href="/features" class="block px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Features</a></li>
+          <li><a href="/pricing" class="block px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Pricing</a></li>
+          <li><a href="/user/login" class="block px-4 py-2 rounded-full hover:bg-black hover:text-white transition duration-200 underline-offset-4 hover:underline">Login</a></li>
+          <li><a href="/user/signup" class="block bg-yellow-400 text-black py-2 px-4 rounded-full hover:bg-yellow-500 font-semibold">Get Started</a></li>
         <% } %>
       </ul>
     </div>
   </nav>
   
   
-
+  
+<style>
+  /* Ensure the fallback text hides when image is successfully loaded */
+  img[src="/images/logo-with-text.svg"]:not([style*="display: none"]) + #logoFallback {
+      display: none;
+  }
+</style>
   
