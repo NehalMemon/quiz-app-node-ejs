@@ -7,7 +7,7 @@ userController.reportsGet = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).populate("reports.quizId");
     
-        res.render("Profile", {
+        res.render("profile", {
           user,
           isAdmin: req.admin?.isAdmin || false,
           reports: user.reports || [],

@@ -16,6 +16,7 @@ const SignupValidator = (req, res, next) => {
   return validate(schema, {
     flashAndRedirect: true,
     redirectTo: "/user/signup",
+    renderView: "User-signup"
   })(req, res, next);
 };
 
@@ -25,6 +26,7 @@ const LoginValidator = (req, res, next) => {
   return validate(schema, {
     flashAndRedirect: true,
     redirectTo: "/user/login",
+    renderView: "User-login",
   })(req, res, next);
 };
 

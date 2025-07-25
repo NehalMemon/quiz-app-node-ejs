@@ -75,10 +75,7 @@ const UserSchema = new mongoose.Schema({
         detailedResults: [Object] // <-- add this
       }],
 
-    lastLogin: {
-        type: Date,
-        default: null,
-      },
+    
 
     isActive: {
         type: Boolean,
@@ -93,7 +90,7 @@ const UserSchema = new mongoose.Schema({
     resetOtp: String,
     resetOtpExpiresAt: Date,
     
-    lastLogout: { type: Date, default: null },
+
 
     isSubscribed: {
         type: Boolean,

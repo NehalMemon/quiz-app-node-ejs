@@ -98,15 +98,23 @@ authController.signupPost = async (req, res) => {
       req.session.tempUser = null;
       const token = UsertokenGenerator(newUser);
       res.cookie("userToken", token, { httpOnly: true });
-
       req.session.user = {
         _id: newUser._id,
         name: newUser.userName,
         isAdmin: newUser.isAdmin,
       };
-
-      req.flash("success", "User created successfully");
-      return res.redirect("/");
+      
+      req.session.save(err => {
+        if (err) {
+          console.error("Session save error:", err);
+          req.flash("error", "Session error. Please log in manually.");
+          return res.redirect("/user/login");
+        }
+      
+        req.flash("success", "User created successfully");
+        return res.redirect("/");
+      });
+      
     }
 
     // Check for existing user
@@ -240,9 +248,10 @@ authController.loginPost = async (req, res) => {
           success: null,
           showOtp: true,
           email,
+          layout: false
         });
       }
-
+    
       if (user.loginOtp !== signupOtp || Date.now() > user.loginOtpExpiresAt) {
         req.flash("error", "Invalid or expired OTP.");
         return res.render("User-login", {
@@ -253,45 +262,43 @@ authController.loginPost = async (req, res) => {
           email,
         });
       }
-
-      // ✅ Block re-login within 24 hours
-      if (user.lastLogin && Date.now() - user.lastLogin.getTime() < 86400000) {
-        const hoursLeft = ((86400000 - (Date.now() - user.lastLogin.getTime())) / 3600000).toFixed(1);
-        req.flash("error", `This account is already logged in. Try again in ${hoursLeft} hours.`);
-        return res.redirect("/user/login");
-      }
-
-      // ✅ Finalize login
+    
+      // Valid OTP
       user.isLoggedIn = true;
-      user.lastLogin = new Date();
       user.loginOtp = user.loginOtpExpiresAt = user.loginOtpSentAt = null;
       await user.save();
-
+    
       const token = UsertokenGenerator(user);
       res.clearCookie("tempLogin");
       res.cookie("userToken", token, {
         httpOnly: true,
         secure: false,
         sameSite: "strict",
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        maxAge: 24 * 60 * 60 * 1000,
       });
-
+    
       req.session.user = {
         _id: user._id,
         name: user.name,
-        isAdmin: user.isAdmin  // <-- this must exist if admin
+        isAdmin: user.isAdmin,
       };
-
-      req.flash("success", "Logged in successfully.");
-      return res.redirect("/");
+    
+      return req.session.save(err => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.redirect("/user/login");
+        }
+        return res.redirect("/");
+      });
     }
-
-    // ✅ Validate Password and send OTP
+    
+    // ✅ ONLY reach here if not in OTP step
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       req.flash("error", "Incorrect password.");
       return res.redirect("/user/login");
     }
+    
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.loginOtp = otp;
