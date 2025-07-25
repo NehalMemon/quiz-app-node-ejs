@@ -494,7 +494,7 @@ adminController.dashboardGet = async (req, res) => {
   const quizzes = await quizModel.find({});
   const activeQuizzes = await quizModel.find({isActive:true });
   const inactiveQuizzes = await quizModel.find({isActive:false });
-  res.render("Dashboard",
+  res.render("dashboard",
     {
       error: req.flash("error")[0] || null,
       success: req.flash("success")[0] || null,

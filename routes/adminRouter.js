@@ -19,7 +19,7 @@ const { quizController } = require("../controllers/quizController");
 const { userController } = require("../controllers/userContoller");
 
 // Admin Signup Routes
-router.get("/signup",devOnly, adminController.signupGet);
+router.get("/Admin-signup",devOnly, adminController.signupGet);
 router.post(
   "/signup",
   validate(registerSchema, {
